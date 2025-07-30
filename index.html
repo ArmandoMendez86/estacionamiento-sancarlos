@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,177 +9,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- QZ Tray -->
+    <script src="https://cdn.jsdelivr.net/npm/qz-tray@2.2.3/qz-tray.js"></script>
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <style>
-        /* Definición de variables de color para los temas */
-        :root, [data-theme="dorado"] {
-            --primary: #D9A743;
-            --primary-focus: #C89A3D;
-            --primary-content: #000000;
-            --base-100: #f8fafc; /* bg-slate-100 */
-            --base-200: #ffffff; /* bg-white */
-            --base-300: #f1f5f9; /* bg-slate-200 */
-            --base-content: #1e293b; /* text-slate-800 */
-            --base-content-secondary: #64748b; /* text-slate-500 */
-            --border-color: #e2e8f0; /* border-slate-200 */
-            --input-border: #cbd5e1; /* border-slate-300 */
-        }
-        [data-theme="bosque"] {
-            --primary: #22c55e; /* green-500 */
-            --primary-focus: #16a34a; /* green-600 */
-            --primary-content: #ffffff;
-            --base-100: #f0fdf4; /* green-50 */
-            --base-200: #ffffff;
-            --base-300: #dcfce7; /* green-100 */
-            --base-content: #14532d; /* green-900 */
-            --base-content-secondary: #166534; /* green-800 */
-            --border-color: #bbf7d0; /* green-200 */
-            --input-border: #86efac; /* green-300 */
-        }
-        [data-theme="oceano"] {
-            --primary: #3b82f6; /* blue-500 */
-            --primary-focus: #2563eb; /* blue-600 */
-            --primary-content: #ffffff;
-            --base-100: #eff6ff; /* blue-50 */
-            --base-200: #ffffff;
-            --base-300: #dbeafe; /* blue-100 */
-            --base-content: #1e3a8a; /* blue-900 */
-            --base-content-secondary: #1e40af; /* blue-800 */
-            --border-color: #bfdbfe; /* blue-200 */
-            --input-border: #93c5fd; /* blue-300 */
-        }
-        [data-theme="atardecer"] {
-            --primary: #f97316; /* orange-500 */
-            --primary-focus: #ea580c; /* orange-600 */
-            --primary-content: #ffffff;
-            --base-100: #fff7ed; /* orange-50 */
-            --base-200: #ffffff;
-            --base-300: #ffedd5; /* orange-100 */
-            --base-content: #7c2d12; /* orange-900 */
-            --base-content-secondary: #9a3412; /* orange-800 */
-            --border-color: #fed7aa; /* orange-200 */
-            --input-border: #fdba74; /* orange-300 */
-        }
-        [data-theme="nocturno"] {
-            --primary: #818cf8; /* indigo-400 */
-            --primary-focus: #6366f1; /* indigo-500 */
-            --primary-content: #ffffff;
-            --base-100: #111827; /* gray-900 */
-            --base-200: #1f2937; /* gray-800 */
-            --base-300: #374151; /* gray-700 */
-            --base-content: #f9fafb; /* gray-50 */
-            --base-content-secondary: #d1d5db; /* gray-300 */
-            --border-color: #4b5563; /* gray-600 */
-            --input-border: #6b7280; /* gray-500 */
-        }
-
-        html { scroll-behavior: smooth; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--base-100);
-            color: var(--base-content);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .bg-primary { background-color: var(--primary); }
-        .hover\:bg-primary-focus:hover { background-color: var(--primary-focus); }
-        .text-primary-content { color: var(--primary-content); }
-        .bg-base-100 { background-color: var(--base-100); }
-        .bg-base-200 { background-color: var(--base-200); }
-        .bg-base-300 { background-color: var(--base-300); }
-        .text-base-content { color: var(--base-content); }
-        .text-base-content-secondary { color: var(--base-content-secondary); }
-        .border-theme { border-color: var(--border-color); }
-        .input-bordered { border-color: var(--input-border); }
-        
-        .focus-style:focus { 
-            outline: none; 
-            box-shadow: 0 0 0 3px var(--primary-focus); 
-            border-color: var(--primary);
-        }
-        .modal-backdrop { background-color: rgba(0,0,0,0.6); transition: opacity 0.2s ease-in-out; }
-        .modal-content { transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; }
-        .fab-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 50; }
-        .fab-options { display: flex; flex-direction: column; align-items: center; position: absolute; bottom: 100%; right: 0; margin-bottom: 1rem; transition: all 0.3s ease-out; opacity: 0; transform: translateY(10px); pointer-events: none; }
-        .fab-container.active .fab-options { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .fab-option { margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.2s ease; }
-        .fab-option:hover { transform: scale(1.1); }
-        .fab-main { transition: transform 0.3s ease-in-out; }
-        .fab-container.active .fab-main { transform: rotate(45deg); }
-        .pension-fields { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
-        .pension-fields.show { max-height: 500px; }
-        .info-card { display: flex; align-items: center; }
-        .icon-bg { flex-shrink: 0; width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; border-radius: 9999px; margin-right: 1rem; }
-        .icon { width: 1.5rem; height: 1.5rem; }
-        .info-card .label { font-size: 0.875rem; }
-        .info-card .value { font-size: 1.25rem; font-weight: 600; }
-        .form-label { display: flex; align-items: center; margin-bottom: 0.25rem; font-size: 0.875rem; font-weight: 500; }
-        .form-icon { width: 1.1rem; height: 1.1rem; margin-right: 0.5rem; }
-        .form-input { width: 100%; padding: 0.75rem 1rem; border-radius: 0.5rem; }
-        .tab-button { display: flex; align-items: center; gap: 0.5rem; }
-        .tab-button.active { border-color: var(--primary); background-color: var(--primary); color: var(--primary-content); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .toast { transition: all 0.3s ease-in-out; transform: translateX(100%); opacity: 0; }
-        .toast.show { transform: translateX(0); opacity: 1; }
-        #login-screen {
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1520050206274-a1ae44613e6d?q=80&w=2070&auto=format&fit=crop') no-repeat center center;
-            background-size: cover;
-        }
-        /* Styles for the new theme popover */
-        #theme-popover {
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-        /* Quick Charge Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 24px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: var(--primary);
-        }
-        input:checked + .slider:before {
-            transform: translateX(16px);
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="bg-base-100 text-base-content">
 
     <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 z-[200] flex items-center justify-center transition-opacity duration-300">
+    <div id="login-screen"
+        class="fixed inset-0 z-[200] flex items-center justify-center transition-opacity duration-300">
         <div class="w-full max-w-md p-8 space-y-8 bg-black/20 backdrop-blur-sm rounded-2xl shadow-2xl">
             <div class="text-center">
-                 <div class="inline-block p-3 rounded-full mb-4 bg-primary">
-                    <svg class="h-8 w-8 text-primary-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.944 8.492h-3.232C15.245 7.038 14.01 6 12.5 6s-2.745 1.038-3.212 2.492H6.056L5 12.492v5h14v-5l-1.056-4zM8.5 11.492c.827 0 1.5-.673 1.5-1.5s-.673-1.5-1.5-1.5-1.5.673-1.5 1.5.673 1.5 1.5 1.5zm7 0c.827 0 1.5-.673 1.5-1.5s-.673-1.5-1.5-1.5-1.5.673-1.5 1.5.673 1.5 1.5 1.5zM6.25 19a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5zm11.5 0a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5z"/><path fill-rule="evenodd" d="M3 10.492a3 3 0 013-3h1.182a4.5 4.5 0 018.636 0H18a3 3 0 013 3v6.058a3.001 3.001 0 01-2.015 2.83A3.75 3.75 0 0115.25 21h-6.5a3.75 3.75 0 01-3.735-3.119A3.001 3.001 0 013 16.55V10.492zm3-1.5a1.5 1.5 0 00-1.5 1.5v6.058a1.5 1.5 0 00.765 1.316A2.25 2.25 0 008.75 19.5h6.5a2.25 2.25 0 002.485-2.134A1.5 1.5 0 0019.5 16.55V10.492a1.5 1.5 0 00-1.5-1.5h-1.682a4.502 4.502 0 01-7.636 0H4.5z" clip-rule="evenodd" /></svg>
+                <div class="inline-block p-3 rounded-full mb-4 bg-primary">
+                    <svg class="h-8 w-8 text-primary-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                        fill="currentColor">
+                        <path
+                            d="M18.944 8.492h-3.232C15.245 7.038 14.01 6 12.5 6s-2.745 1.038-3.212 2.492H6.056L5 12.492v5h14v-5l-1.056-4zM8.5 11.492c.827 0 1.5-.673 1.5-1.5s-.673-1.5-1.5-1.5-1.5.673-1.5 1.5.673 1.5 1.5 1.5zm7 0c.827 0 1.5-.673 1.5-1.5s-.673-1.5-1.5-1.5-1.5.673-1.5 1.5.673 1.5 1.5 1.5zM6.25 19a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5zm11.5 0a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5z" />
+                        <path fill-rule="evenodd"
+                            d="M3 10.492a3 3 0 013-3h1.182a4.5 4.5 0 018.636 0H18a3 3 0 013 3v6.058a3.001 3.001 0 01-2.015 2.83A3.75 3.75 0 0115.25 21h-6.5a3.75 3.75 0 01-3.735-3.119A3.001 3.001 0 013 16.55V10.492zm3-1.5a1.5 1.5 0 00-1.5 1.5v6.058a1.5 1.5 0 00.765 1.316A2.25 2.25 0 008.75 19.5h6.5a2.25 2.25 0 002.485-2.134A1.5 1.5 0 0019.5 16.55V10.492a1.5 1.5 0 00-1.5-1.5h-1.682a4.502 4.502 0 01-7.636 0H4.5z"
+                            clip-rule="evenodd" />
+                    </svg>
                 </div>
                 <h2 class="text-3xl font-extrabold text-white">Iniciar Sesión</h2>
                 <p class="mt-2 text-slate-300">Bienvenido al Control de Estacionamiento</p>
@@ -186,14 +39,19 @@
             <form id="login-form" class="space-y-6">
                 <div>
                     <label for="login-username" class="block text-sm font-medium text-slate-200">Usuario</label>
-                    <input id="login-username" type="text" required class="mt-1 block w-full px-4 py-3 bg-white/20 text-white border border-slate-400 rounded-lg focus-style placeholder-slate-400" placeholder="nombre.usuario">
+                    <input id="login-username" type="text" required
+                        class="mt-1 block w-full px-4 py-3 bg-white/20 text-white border border-slate-400 rounded-lg focus-style placeholder-slate-400"
+                        placeholder="nombre.usuario">
                 </div>
                 <div>
                     <label for="login-password" class="block text-sm font-medium text-slate-200">Contraseña</label>
-                    <input id="login-password" type="password" required class="mt-1 block w-full px-4 py-3 bg-white/20 text-white border border-slate-400 rounded-lg focus-style" placeholder="••••••••">
+                    <input id="login-password" type="password" required
+                        class="mt-1 block w-full px-4 py-3 bg-white/20 text-white border border-slate-400 rounded-lg focus-style"
+                        placeholder="••••••••">
                 </div>
                 <div>
-                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold bg-primary text-primary-content hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300">
+                    <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold bg-primary text-primary-content hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300">
                         Entrar
                     </button>
                 </div>
@@ -203,7 +61,7 @@
 
     <!-- Main App Content -->
     <div id="main-app" class="hidden w-full min-h-screen flex items-center justify-center py-8">
-        <div class="w-full max-w-5xl mx-auto p-4 sm:p-6">
+        <div class="w-full max-w-6xl mx-auto p-4 sm:p-6">
             <div class="bg-base-200 rounded-2xl shadow-xl p-6 md:p-10 relative">
                 <!-- User Info, Theme Selector, and Logout Button -->
                 <div class="absolute top-4 right-6 flex items-center gap-4">
@@ -213,35 +71,106 @@
                     </div>
                     <div class="relative">
                         <button id="theme-toggle-btn" class="p-2 rounded-full hover:bg-base-300 transition-colors">
-                             <svg class="w-6 h-6 text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402a3.75 3.75 0 00-5.304-5.304L4.098 14.6c-.43.43-.682.998-.682 1.602s.252 1.172.682 1.602zm3.75-3.75a.75.75 0 011.06 0l2.122 2.122a.75.75 0 01-1.06 1.06L6.878 18.182a.75.75 0 010-1.06z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15.75a3.75 3.75 0 013.75-3.75V4.5a3.75 3.75 0 00-7.5 0v7.5A3.75 3.75 0 0112 15.75z" />
+                            <svg class="w-6 h-6 text-base-content-secondary" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402a3.75 3.75 0 00-5.304-5.304L4.098 14.6c-.43.43-.682.998-.682 1.602s.252 1.172.682 1.602zm3.75-3.75a.75.75 0 011.06 0l2.122 2.122a.75.75 0 01-1.06 1.06L6.878 18.182a.75.75 0 010-1.06z" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 15.75a3.75 3.75 0 013.75-3.75V4.5a3.75 3.75 0 00-7.5 0v7.5A3.75 3.75 0 0112 15.75z" />
                             </svg>
                         </button>
                         <!-- Theme Popover -->
-                        <div id="theme-popover" class="absolute top-full right-0 mt-2 w-48 bg-base-200 border border-theme rounded-lg shadow-xl p-2 z-10 opacity-0 scale-95 transform pointer-events-none">
+                        <div id="theme-popover"
+                            class="absolute top-full right-0 mt-2 w-48 bg-base-200 border border-theme rounded-lg shadow-xl p-2 z-10 opacity-0 scale-95 transform pointer-events-none">
                             <h4 class="text-sm font-semibold px-2 py-1 text-base-content">Seleccionar Tema</h4>
                             <div id="theme-selector" class="mt-1 grid grid-cols-3 gap-1">
                                 <!-- Theme options will be injected here -->
                             </div>
                         </div>
                     </div>
-                    <button id="logout-btn" class="text-sm text-red-600 hover:underline font-semibold">Cerrar Sesión</button>
+                    <button id="logout-btn" class="text-sm text-red-600 hover:underline font-semibold">Cerrar
+                        Sesión</button>
                 </div>
-                
+
                 <header class="mb-8 text-center flex flex-col items-center">
                     <div class="bg-primary p-3 rounded-full mb-4">
-                        <svg class="h-8 w-8 text-primary-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.944 8.492h-3.232C15.245 7.038 14.01 6 12.5 6s-2.745 1.038-3.212 2.492H6.056L5 12.492v5h14v-5l-1.056-4zM8.5 11.492c.827 0 1.5-.673 1.5-1.5s-.673-1.5-1.5-1.5-1.5.673-1.5 1.5.673 1.5 1.5 1.5zm7 0c.827 0 1.5-.673 1.5-1.5s-.673-1.5-1.5-1.5-1.5.673-1.5 1.5.673 1.5 1.5 1.5zM6.25 19a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5zm11.5 0a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5z"/><path fill-rule="evenodd" d="M3 10.492a3 3 0 013-3h1.182a4.5 4.5 0 018.636 0H18a3 3 0 013 3v6.058a3.001 3.001 0 01-2.015 2.83A3.75 3.75 0 0115.25 21h-6.5a3.75 3.75 0 01-3.735-3.119A3.001 3.001 0 013 16.55V10.492zm3-1.5a1.5 1.5 0 00-1.5 1.5v6.058a1.5 1.5 0 00.765 1.316A2.25 2.25 0 008.75 19.5h6.5a2.25 2.25 0 002.485-2.134A1.5 1.5 0 0019.5 16.55V10.492a1.5 1.5 0 00-1.5-1.5h-1.682a4.502 4.502 0 01-7.636 0H4.5z" clip-rule="evenodd" /></svg>
+                        <svg class="h-8 w-8 text-primary-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M18.944 8.492h-3.232C15.245 7.038 14.01 6 12.5 6s-2.745 1.038-3.212 2.492H6.056L5 12.492v5h14v-5l-1.056-4zM8.5 11.492c.827 0 1.5-.673 1.5-1.5s-.673-1.5-1.5-1.5-1.5.673-1.5 1.5.673 1.5 1.5 1.5zm7 0c.827 0 1.5-.673 1.5-1.5s-.673-1.5-1.5-1.5-1.5.673-1.5 1.5.673 1.5 1.5 1.5zM6.25 19a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5zm11.5 0a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5z" />
+                            <path fill-rule="evenodd"
+                                d="M3 10.492a3 3 0 013-3h1.182a4.5 4.5 0 018.636 0H18a3 3 0 013 3v6.058a3.001 3.001 0 01-2.015 2.83A3.75 3.75 0 0115.25 21h-6.5a3.75 3.75 0 01-3.735-3.119A3.001 3.001 0 013 16.55V10.492zm3-1.5a1.5 1.5 0 00-1.5 1.5v6.058a1.5 1.5 0 00.765 1.316A2.25 2.25 0 008.75 19.5h6.5a2.25 2.25 0 002.485-2.134A1.5 1.5 0 0019.5 16.55V10.492a1.5 1.5 0 00-1.5-1.5h-1.682a4.502 4.502 0 01-7.636 0H4.5z"
+                                clip-rule="evenodd" />
+                        </svg>
                     </div>
                     <h1 class="text-3xl md:text-4xl font-bold text-base-content">Control de Estacionamiento</h1>
                     <p class="text-base-content-secondary mt-2">Escanee un ticket o registre una nueva entrada.</p>
                 </header>
 
-                <div class="flex justify-center mb-8"><button id="new-entry-btn" class="bg-primary text-primary-content font-bold py-3 px-8 rounded-lg hover:bg-primary-focus focus:outline-none focus:ring-4 focus:ring-primary/50 transition-all duration-300 transform hover:scale-105 shadow-md">Registrar Nueva Entrada</button></div>
+                <!-- Dashboard Cards -->
+                <div id="dashboard-cards" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+                    <!-- Card: Vehículos Activos -->
+                    <div class="dashboard-card bg-blue-100 text-blue-800">
+                        <div class="card-icon bg-blue-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V8.618a1 1 0 01.553-.894L9 5m0 15V5m0 15h6.447A1 1 0 0016 20.382V12.618a1 1 0 00-.553-.894L15 11m-6 9v-5m6-4h5.447A1 1 0 0122 12.382V7.618a1 1 0 01-.553-.894L15 4m0 7V4m0 7h-2m-2 2h2v2h-2v-2z" /></svg>
+                        </div>
+                        <div class="text-right">
+                            <p class="card-title">Vehículos Activos</p>
+                            <p id="active-vehicles-card" class="card-value">0</p>
+                        </div>
+                    </div>
+                    <!-- Card: Ingresos Estacionamiento -->
+                    <div class="dashboard-card bg-green-100 text-green-800">
+                        <div class="card-icon bg-green-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        </div>
+                        <div class="text-right">
+                            <p class="card-title">Ingresos (Est.)</p>
+                            <p id="parking-revenue-card" class="card-value">$0.00</p>
+                        </div>
+                    </div>
+                    <!-- Card: Ingresos Pensiones -->
+                    <div class="dashboard-card bg-purple-100 text-purple-800">
+                        <div class="card-icon bg-purple-200">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </div>
+                        <div class="text-right">
+                            <p class="card-title">Ingresos (Pen.)</p>
+                            <p id="pension-revenue-card" class="card-value">$0.00</p>
+                        </div>
+                    </div>
+                    <!-- Card: Ingresos Servicios -->
+                    <div class="dashboard-card bg-yellow-100 text-yellow-800">
+                        <div class="card-icon bg-yellow-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        </div>
+                        <div class="text-right">
+                            <p class="card-title">Ingresos (Serv.)</p>
+                            <p id="services-revenue-card" class="card-value">$0.00</p>
+                        </div>
+                    </div>
+                    <!-- Card: Gastos -->
+                    <div class="dashboard-card bg-red-100 text-red-800">
+                        <div class="card-icon bg-red-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>
+                        </div>
+                        <div class="text-right">
+                            <p class="card-title">Gastos</p>
+                            <p id="expenses-card" class="card-value">$0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="flex justify-center mb-8"><button id="new-entry-btn"
+                        class="bg-primary text-primary-content font-bold py-3 px-8 rounded-lg hover:bg-primary-focus focus:outline-none focus:ring-4 focus:ring-primary/50 transition-all duration-300 transform hover:scale-105 shadow-md">Registrar
+                        Nueva Entrada</button></div>
 
                 <div class="mb-6">
                     <div class="flex justify-between items-center mb-2">
-                        <label for="barcode-input" class="block text-sm font-medium text-base-content-secondary">Escanear Código de Barras</label>
+                        <label for="barcode-input"
+                            class="block text-sm font-medium text-base-content-secondary">Escanear Código de
+                            Barras</label>
                         <div class="flex items-center gap-2">
                             <span class="text-sm font-medium text-base-content-secondary">Cobro Rápido</span>
                             <label class="toggle-switch">
@@ -252,49 +181,209 @@
                     </div>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-6 w-6 text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5A.75.75 0 014.5 3h15a.75.75 0 01.75.75v15a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75v-15zm3 3.75a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v6a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-6zm3 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v6a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-6zm3 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v6a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-6zm3 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v6a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-6z" />
+                            <svg class="h-6 w-6 text-base-content-secondary" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3.75 4.5A.75.75 0 014.5 3h15a.75.75 0 01.75.75v15a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75v-15zm3 3.75a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v6a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-6zm3 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v6a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-6zm3 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v6a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-6zm3 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v6a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-6z" />
                             </svg>
                         </div>
-                        <input type="text" id="barcode-input" placeholder="Escanee o ingrese el código..." class="w-full pl-12 pr-4 py-3 border rounded-lg text-lg focus-style transition-shadow duration-200 bg-base-200 input-bordered">
+                        <input type="text" id="barcode-input" placeholder="Escanee o ingrese el código..."
+                            class="w-full pl-12 pr-4 py-3 border rounded-lg text-lg focus-style transition-shadow duration-200 bg-base-200 input-bordered">
                     </div>
                 </div>
 
                 <div id="ticket-info" class="hidden bg-base-100 p-6 rounded-lg border border-theme">
-                    <h2 class="text-2xl font-semibold text-base-content mb-6 border-b pb-4 border-theme">Detalles del Ticket</h2>
+                    <h2 class="text-2xl font-semibold text-base-content mb-6 border-b pb-4 border-theme">Detalles del
+                        Ticket</h2>
                     <div id="ticket-status-banner" class="hidden p-3 rounded-lg mb-4 text-center font-bold"></div>
-                    
+
                     <div id="hourly-details">
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></div><div><p class="label text-base-content-secondary">Placa</p><p id="vehicle-plate-hourly" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5h10.5a1.125 1.125 0 001.125-1.125V6.75a1.125 1.125 0 00-1.125-1.125H3.375A1.125 1.125 0 002.25 6.75v10.5a1.125 1.125 0 001.125 1.125z" /></svg></div><div><p class="label text-base-content-secondary">Tipo Vehículo</p><p id="vehicle-type-hourly" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" /></svg></div><div><p class="label text-base-content-secondary">Marca</p><p id="vehicle-brand-hourly" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m-5.043 5.043a3 3 0 00-4.163-3.873-2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 00-8.4 2.245c0 .399.078.78.22 1.128zm0 0c0 .399.078.78.22 1.128a3 3 0 005.78 1.128z" /></svg></div><div><p class="label text-base-content-secondary">Color</p><p id="vehicle-color-hourly" class="value text-base-content"></p></div></div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Placa</p>
+                                    <p id="vehicle-plate-hourly" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5h10.5a1.125 1.125 0 001.125-1.125V6.75a1.125 1.125 0 00-1.125-1.125H3.375A1.125 1.125 0 002.25 6.75v10.5a1.125 1.125 0 001.125 1.125z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Tipo Vehículo</p>
+                                    <p id="vehicle-type-hourly" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Marca</p>
+                                    <p id="vehicle-brand-hourly" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m-5.043 5.043a3 3 0 00-4.163-3.873-2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 00-8.4 2.245c0 .399.078.78.22 1.128zm0 0c0 .399.078.78.22 1.128a3 3 0 005.78 1.128z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Color</p>
+                                    <p id="vehicle-color-hourly" class="value text-base-content"></p>
+                                </div>
+                            </div>
                         </div>
                         <div class="mt-4 pt-4 border-t border-theme grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><p class="label text-base-content-secondary">Hora de Entrada</p><p id="entry-time-hourly" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><p class="label text-base-content-secondary">Tiempo Transcurrido</p><p id="time-elapsed-hourly" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><p class="label text-base-content-secondary">Hora de Salida</p><p id="exit-time-hourly" class="value text-base-content"></p></div></div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Hora de Entrada</p>
+                                    <p id="entry-time-hourly" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Tiempo Transcurrido</p>
+                                    <p id="time-elapsed-hourly" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Hora de Salida</p>
+                                    <p id="exit-time-hourly" class="value text-base-content"></p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-6 pt-6 border-t-2 border-dashed border-theme"><div class="bg-base-content text-base-200 p-4 rounded-lg flex justify-between items-center shadow-inner"><p class="text-xl font-bold">TOTAL A PAGAR:</p><p id="total-cost-hourly" class="text-3xl font-extrabold"></p></div></div>
-                        <div class="mt-8 flex flex-col sm:flex-row sm:justify-center sm:space-x-4 space-y-4 sm:space-y-0">
-                            <button id="charge-button" class="w-full sm:w-auto bg-primary text-primary-content font-bold py-3 px-6 rounded-lg hover:bg-primary-focus focus:outline-none focus:ring-4 focus:ring-primary/50 transition-all duration-300 shadow-md">Cobrar y Registrar Salida</button>
-                            <button id="convert-to-overnight-btn" class="hidden w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 shadow-md">Cambiar a Pensión Nocturna</button>
-                            <button id="cancel-ticket-btn" class="hidden w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-all duration-300 shadow-md">Cancelar Ticket</button>
+                        <div class="mt-6 pt-6 border-t-2 border-dashed border-theme">
+                            <div
+                                class="bg-base-content text-base-200 p-4 rounded-lg flex justify-between items-center shadow-inner">
+                                <p class="text-xl font-bold">TOTAL A PAGAR:</p>
+                                <p id="total-cost-hourly" class="text-3xl font-extrabold"></p>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-8 flex flex-col sm:flex-row sm:justify-center sm:space-x-4 space-y-4 sm:space-y-0">
+                            <button id="charge-button"
+                                class="w-full sm:w-auto bg-primary text-primary-content font-bold py-3 px-6 rounded-lg hover:bg-primary-focus focus:outline-none focus:ring-4 focus:ring-primary/50 transition-all duration-300 shadow-md">Cobrar
+                                y Registrar Salida</button>
+                            <button id="convert-to-overnight-btn"
+                                class="hidden w-full sm:w-auto bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 shadow-md">Cambiar
+                                a Pensión Nocturna</button>
+                            <button id="cancel-ticket-btn"
+                                class="hidden w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-all duration-300 shadow-md">Cancelar
+                                Ticket</button>
                         </div>
                     </div>
 
                     <div id="pension-details" class="hidden">
-                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></div><div><p class="label text-base-content-secondary">Placa</p><p id="vehicle-plate-pension" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5h10.5a1.125 1.125 0 001.125-1.125V6.75a1.125 1.125 0 00-1.125-1.125H3.375A1.125 1.125 0 002.25 6.75v10.5a1.125 1.125 0 001.125 1.125z" /></svg></div><div><p class="label text-base-content-secondary">Tipo Vehículo</p><p id="vehicle-type-pension" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" /></svg></div><div><p class="label text-base-content-secondary">Marca</p><p id="vehicle-brand-pension" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m-5.043 5.043a3 3 0 00-4.163-3.873-2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 00-8.4 2.245c0 .399.078.78.22 1.128zm0 0c0 .399.078.78.22 1.128a3 3 0 005.78 1.128z" /></svg></div><div><p class="label text-base-content-secondary">Color</p><p id="vehicle-color-pension" class="value text-base-content"></p></div></div>
-                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4 sm:col-span-2 lg:col-span-4"><div class="icon-bg bg-base-300"><svg class="icon text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg></div><div><p class="label text-base-content-secondary">Tipo de Pensión</p><p id="pension-type-details" class="value text-base-content"></p></div></div>
-                            <div class="sm:col-span-2 lg:col-span-4 mt-4 pt-4 border-t-2 border-dashed border-theme"><div class="bg-green-600 text-white p-4 rounded-lg flex justify-between items-center shadow-inner"><p class="text-xl font-bold">PENSIÓN VENCE:</p><p id="end-date-pension" class="text-3xl font-extrabold"></p></div></div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Placa</p>
+                                    <p id="vehicle-plate-pension" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5h10.5a1.125 1.125 0 001.125-1.125V6.75a1.125 1.125 0 00-1.125-1.125H3.375A1.125 1.125 0 002.25 6.75v10.5a1.125 1.125 0 001.125 1.125z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Tipo Vehículo</p>
+                                    <p id="vehicle-type-pension" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Marca</p>
+                                    <p id="vehicle-brand-pension" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="info-card bg-base-200 border border-theme rounded-lg p-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m-5.043 5.043a3 3 0 00-4.163-3.873-2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 00-8.4 2.245c0 .399.078.78.22 1.128zm0 0c0 .399.078.78.22 1.128a3 3 0 005.78 1.128z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Color</p>
+                                    <p id="vehicle-color-pension" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div
+                                class="info-card bg-base-200 border border-theme rounded-lg p-4 sm:col-span-2 lg:col-span-4">
+                                <div class="icon-bg bg-base-300"><svg class="icon text-primary"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                    </svg></div>
+                                <div>
+                                    <p class="label text-base-content-secondary">Tipo de Pensión</p>
+                                    <p id="pension-type-details" class="value text-base-content"></p>
+                                </div>
+                            </div>
+                            <div class="sm:col-span-2 lg:col-span-4 mt-4 pt-4 border-t-2 border-dashed border-theme">
+                                <div
+                                    class="bg-green-600 text-white p-4 rounded-lg flex justify-between items-center shadow-inner">
+                                    <p class="text-xl font-bold">PENSIÓN VENCE:</p>
+                                    <p id="end-date-pension" class="text-3xl font-extrabold"></p>
+                                </div>
+                            </div>
                         </div>
                         <div class="mt-8 text-center">
-                            <button id="cancel-pension-btn" class="hidden w-full md:w-auto bg-orange-500 text-white font-bold py-3 px-12 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 transition-all duration-300 shadow-md">Cancelar Pensión Nocturna</button>
+                            <button id="cancel-pension-btn"
+                                class="hidden w-full md:w-auto bg-orange-500 text-white font-bold py-3 px-12 rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-300 transition-all duration-300 shadow-md">Cancelar
+                                Pensión Nocturna</button>
                         </div>
                     </div>
                 </div>
@@ -303,113 +392,212 @@
     </div>
 
     <!-- New Entry Modal -->
-    <div id="new-entry-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
+    <div id="new-entry-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
         <div class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-2xl opacity-0 scale-95 transform">
             <h2 class="text-2xl font-bold mb-6 text-base-content">Registrar Nueva Entrada</h2>
             <div class="mb-6 grid grid-cols-3 gap-2 p-1 bg-base-300 rounded-lg">
-                <button id="type-hourly-btn" class="px-4 py-2 text-sm font-bold rounded-md transition-colors bg-primary text-primary-content">Por Horas</button>
-                <button id="type-overnight-btn" class="px-4 py-2 text-sm font-bold rounded-md transition-colors text-base-content-secondary">Pensión Nocturna</button>
-                <button id="type-pension-btn" class="px-4 py-2 text-sm font-bold rounded-md transition-colors text-base-content-secondary">Estancia Pagada</button>
+                <button id="type-hourly-btn"
+                    class="px-4 py-2 text-sm font-bold rounded-md transition-colors bg-primary text-primary-content">Por
+                    Horas</button>
+                <button id="type-overnight-btn"
+                    class="px-4 py-2 text-sm font-bold rounded-md transition-colors text-base-content-secondary">Pensión
+                    Nocturna</button>
+                <button id="type-pension-btn"
+                    class="px-4 py-2 text-sm font-bold rounded-md transition-colors text-base-content-secondary">Estancia
+                    Pagada</button>
             </div>
             <form id="new-entry-form" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label for="vehicle-type-select" class="form-label text-base-content"><svg class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5h10.5a1.125 1.125 0 001.125-1.125V6.75a1.125 1.125 0 00-1.125-1.125H3.375A1.125 1.125 0 002.25 6.75v10.5a1.125 1.125 0 001.125 1.125z" /></svg><span>Tipo de Vehículo</span></label><select id="vehicle-type-select" class="form-input focus-style bg-base-200 input-bordered" required></select></div>
+                    <div><label for="vehicle-type-select" class="form-label text-base-content"><svg
+                                class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5h10.5a1.125 1.125 0 001.125-1.125V6.75a1.125 1.125 0 00-1.125-1.125H3.375A1.125 1.125 0 002.25 6.75v10.5a1.125 1.125 0 001.125 1.125z" />
+                            </svg><span>Tipo de Vehículo</span></label><select id="vehicle-type-select"
+                            class="form-input focus-style bg-base-200 input-bordered" required></select></div>
                     <div>
-                        <label for="new-plate-input" class="form-label text-base-content"><svg class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg><span>Placa</span></label>
-                        <div class="relative"><input type="text" id="new-plate-input" placeholder="ABC-123" class="form-input focus-style bg-base-200 input-bordered" required><span id="plate-lookup-msg" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold"></span></div>
+                        <label for="new-plate-input" class="form-label text-base-content"><svg
+                                class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg><span>Placa</span></label>
+                        <div class="relative"><input type="text" id="new-plate-input" placeholder="ABC-123"
+                                class="form-input focus-style bg-base-200 input-bordered" required><span
+                                id="plate-lookup-msg"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold"></span></div>
                     </div>
-                    <div><label for="new-brand-select" class="form-label text-base-content"><svg class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" /></svg><span>Marca</span></label><select id="new-brand-select" class="form-input focus-style bg-base-200 input-bordered" required></select></div>
-                    <div><label for="new-color-input" class="form-label text-base-content"><svg class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m-5.043 5.043a3 3 0 00-4.163-3.873-2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 00-8.4 2.245c0 .399.078.78.22 1.128zm0 0c0 .399.078.78.22 1.128a3 3 0 005.78 1.128z" /></svg><span>Color</span></label><input type="text" id="new-color-input" list="color-suggestions" placeholder="Ej: Rojo" class="form-input focus-style bg-base-200 input-bordered" required><datalist id="color-suggestions"></datalist></div>
+                    <div><label for="new-brand-select" class="form-label text-base-content"><svg
+                                class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                            </svg><span>Marca</span></label><select id="new-brand-select"
+                            class="form-input focus-style bg-base-200 input-bordered" required></select></div>
+                    <div><label for="new-color-input" class="form-label text-base-content"><svg
+                                class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m0 0a15.998 15.998 0 013.388-1.622m-5.043 5.043a3 3 0 00-4.163-3.873-2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 00-8.4 2.245c0 .399.078.78.22 1.128zm0 0c0 .399.078.78.22 1.128a3 3 0 005.78 1.128z" />
+                            </svg><span>Color</span></label><input type="text" id="new-color-input"
+                            list="color-suggestions" placeholder="Ej: Rojo"
+                            class="form-input focus-style bg-base-200 input-bordered" required><datalist
+                            id="color-suggestions"></datalist></div>
                 </div>
                 <div id="pension-fields" class="pension-fields pt-4 border-t border-theme">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div id="pension-type-container" class="md:col-span-1"><label for="new-pension-type-input" class="form-label text-base-content"><svg class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg><span>Tipo de Estancia</span></label><input type="text" id="new-pension-type-input" class="form-input focus-style bg-base-200 input-bordered" placeholder="Ej: Mensual, Quincenal"></div>
-                        <div id="pension-end-date-container" class="md:col-span-1"><label for="new-pension-end-date" class="form-label text-base-content"><svg class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18" /></svg><span>Fecha de Vencimiento</span></label><input type="date" id="new-pension-end-date" class="form-input focus-style bg-base-200 input-bordered"></div>
-                        <div class="md:col-span-1"><label for="new-pension-amount" class="form-label text-base-content"><svg class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>Monto Pagado $</span></label><input type="number" id="new-pension-amount" placeholder="500.00" step="0.01" class="form-input focus-style bg-base-200 input-bordered"></div>
+                        <div id="pension-type-container" class="md:col-span-1"><label for="new-pension-type-input"
+                                class="form-label text-base-content"><svg class="form-icon text-base-content-secondary"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg><span>Tipo de Estancia</span></label><input type="text"
+                                id="new-pension-type-input" class="form-input focus-style bg-base-200 input-bordered"
+                                placeholder="Ej: Mensual, Quincenal"></div>
+                        <div id="pension-end-date-container" class="md:col-span-1"><label for="new-pension-end-date"
+                                class="form-label text-base-content"><svg class="form-icon text-base-content-secondary"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18" />
+                                </svg><span>Fecha de Vencimiento</span></label><input type="date"
+                                id="new-pension-end-date" class="form-input focus-style bg-base-200 input-bordered">
+                        </div>
+                        <div class="md:col-span-1"><label for="new-pension-amount"
+                                class="form-label text-base-content"><svg class="form-icon text-base-content-secondary"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg><span>Monto Pagado $</span></label><input type="number" id="new-pension-amount"
+                                placeholder="500.00" step="0.01"
+                                class="form-input focus-style bg-base-200 input-bordered"></div>
                     </div>
                 </div>
-                <div class="mt-8 flex justify-end space-x-4 pt-4"><button type="button" id="cancel-entry-btn" class="bg-base-300 text-base-content font-bold py-2 px-6 rounded-lg hover:bg-opacity-80 transition-colors">Cancelar</button><button type="submit" class="bg-primary text-primary-content font-bold py-2 px-6 rounded-lg hover:bg-primary-focus transition-colors">Guardar Entrada</button></div>
+                <div class="mt-8 flex justify-end space-x-4 pt-4"><button type="button" id="cancel-entry-btn"
+                        class="bg-base-300 text-base-content font-bold py-2 px-6 rounded-lg hover:bg-opacity-80 transition-colors">Cancelar</button><button
+                        type="submit"
+                        class="bg-primary text-primary-content font-bold py-2 px-6 rounded-lg hover:bg-primary-focus transition-colors">Guardar
+                        Entrada</button></div>
             </form>
         </div>
     </div>
-    
+
     <!-- Calculator Modal -->
-    <div id="calculator-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
-        <div class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-2xl opacity-0 scale-95 transform flex flex-col max-h-[90vh]">
+    <div id="calculator-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-2xl opacity-0 scale-95 transform flex flex-col max-h-[90vh]">
             <h2 class="text-2xl font-bold mb-6 text-base-content flex-shrink-0">Calculadora de Tarifas</h2>
-            
+
             <div class="overflow-y-auto flex-grow pr-2">
                 <form id="calculator-form">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div><label for="calc-vehicle-type" class="form-label text-base-content"><span>Tipo de Vehículo</span></label><select id="calc-vehicle-type" class="form-input focus-style bg-base-200 input-bordered" required></select></div>
-                        <div><label for="calc-entry-time" class="form-label text-base-content"><span>Entrada</span></label><input type="text" id="calc-entry-time" class="form-input focus-style bg-base-200 input-bordered" required></div>
-                        <div><label for="calc-exit-time" class="form-label text-base-content"><span>Salida</span></label><input type="text" id="calc-exit-time" class="form-input focus-style bg-base-200 input-bordered" required></div>
+                        <div><label for="calc-vehicle-type" class="form-label text-base-content"><span>Tipo de
+                                    Vehículo</span></label><select id="calc-vehicle-type"
+                                class="form-input focus-style bg-base-200 input-bordered" required></select></div>
+                        <div><label for="calc-entry-time"
+                                class="form-label text-base-content"><span>Entrada</span></label><input type="text"
+                                id="calc-entry-time" class="form-input focus-style bg-base-200 input-bordered" required>
+                        </div>
+                        <div><label for="calc-exit-time"
+                                class="form-label text-base-content"><span>Salida</span></label><input type="text"
+                                id="calc-exit-time" class="form-input focus-style bg-base-200 input-bordered" required>
+                        </div>
                     </div>
-                    <div class="flex justify-center my-6"><button type="submit" class="bg-primary text-primary-content font-bold py-3 px-8 rounded-lg hover:bg-primary-focus transition-colors">Calcular Costo</button></div>
+                    <div class="flex justify-center my-6"><button type="submit"
+                            class="bg-primary text-primary-content font-bold py-3 px-8 rounded-lg hover:bg-primary-focus transition-colors">Calcular
+                            Costo</button></div>
                 </form>
                 <div id="calculator-results" class="hidden pt-6 border-t border-theme">
                     <div id="calc-breakdown" class="space-y-3 mb-4"></div>
-                    <div class="bg-base-content text-base-200 p-4 rounded-lg flex justify-between items-center shadow-inner">
+                    <div
+                        class="bg-base-content text-base-200 p-4 rounded-lg flex justify-between items-center shadow-inner">
                         <p class="text-lg font-bold">TOTAL A PAGAR:</p>
                         <p id="calc-total-cost" class="text-2xl font-extrabold"></p>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-8 flex justify-end flex-shrink-0"><button type="button" id="cancel-calc-btn" class="bg-base-300 text-base-content font-bold py-2 px-6 rounded-lg hover:bg-opacity-80 transition-colors">Cerrar</button></div>
+            <div class="mt-8 flex justify-end flex-shrink-0"><button type="button" id="cancel-calc-btn"
+                    class="bg-base-300 text-base-content font-bold py-2 px-6 rounded-lg hover:bg-opacity-80 transition-colors">Cerrar</button>
+            </div>
         </div>
     </div>
 
     <!-- Expenses Modal -->
-    <div id="expenses-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
-        <div class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-2xl opacity-0 scale-95 transform flex flex-col max-h-[90vh]">
+    <div id="expenses-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-2xl opacity-0 scale-95 transform flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-6 flex-shrink-0">
                 <h2 class="text-2xl font-bold text-base-content">Gestión de Gastos del Día</h2>
-                <button id="close-expenses-btn" class="text-base-content-secondary hover:text-base-content text-3xl leading-none">&times;</button>
+                <button id="close-expenses-btn"
+                    class="text-base-content-secondary hover:text-base-content text-3xl leading-none">&times;</button>
             </div>
-            
+
             <div class="overflow-y-auto flex-grow pr-4 -mr-4">
                 <form id="expense-form" class="space-y-4 bg-base-100 p-4 rounded-lg mb-6">
                     <input type="hidden" id="expense-id-input">
                     <div>
-                        <label for="expense-description-input" class="form-label text-base-content"><span>Descripción del Gasto</span></label>
-                        <input type="text" id="expense-description-input" class="form-input focus-style bg-base-200 input-bordered" placeholder="Ej: Compra de agua" required>
+                        <label for="expense-description-input" class="form-label text-base-content"><span>Descripción
+                                del Gasto</span></label>
+                        <input type="text" id="expense-description-input"
+                            class="form-input focus-style bg-base-200 input-bordered" placeholder="Ej: Compra de agua"
+                            required>
                     </div>
                     <div>
-                        <label for="expense-amount-input" class="form-label text-base-content"><span>Monto ($)</span></label>
-                        <input type="number" id="expense-amount-input" step="0.01" class="form-input focus-style bg-base-200 input-bordered" placeholder="50.00" required>
+                        <label for="expense-amount-input" class="form-label text-base-content"><span>Monto
+                                ($)</span></label>
+                        <input type="number" id="expense-amount-input" step="0.01"
+                            class="form-input focus-style bg-base-200 input-bordered" placeholder="50.00" required>
                     </div>
                     <div class="flex justify-end space-x-3">
-                        <button type="button" id="cancel-expense-edit-btn" class="hidden bg-base-300 text-base-content font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 text-sm">Cancelar</button>
-                        <button type="submit" id="save-expense-btn" class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus text-sm">Guardar Gasto</button>
+                        <button type="button" id="cancel-expense-edit-btn"
+                            class="hidden bg-base-300 text-base-content font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 text-sm">Cancelar</button>
+                        <button type="submit" id="save-expense-btn"
+                            class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus text-sm">Guardar
+                            Gasto</button>
                     </div>
                 </form>
 
                 <h3 class="font-semibold mb-3 text-base-content">Gastos de Hoy</h3>
                 <div id="expenses-list-container" class="space-y-2 mb-4"></div>
 
-                <div class="bg-base-content text-base-200 p-4 rounded-lg flex justify-between items-center shadow-inner mt-6">
+                <div
+                    class="bg-base-content text-base-200 p-4 rounded-lg flex justify-between items-center shadow-inner mt-6">
                     <p class="text-lg font-bold">TOTAL DE GASTOS:</p>
                     <p id="expenses-total" class="text-2xl font-extrabold">$0.00</p>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Settings Modal -->
-    <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
-        <div class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-3xl max-h-[90vh] flex flex-col opacity-0 scale-95 transform">
+    <div id="settings-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-3xl max-h-[90vh] flex flex-col opacity-0 scale-95 transform">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-base-content">Configuración</h2>
-                <button id="close-settings-btn" class="text-base-content-secondary hover:text-base-content text-3xl leading-none">&times;</button>
+                <button id="close-settings-btn"
+                    class="text-base-content-secondary hover:text-base-content text-3xl leading-none">&times;</button>
             </div>
-            
+
             <div class="border-b border-theme mb-4">
                 <nav class="-mb-px flex space-x-6" id="settings-tabs">
-                    <button data-tab="business" class="tab-button active shrink-0 border-b-2 font-medium px-1 py-2 text-sm text-base-content-secondary hover:border-gray-300 hover:text-gray-700">Negocio</button>
-                    <button data-tab="services" class="tab-button shrink-0 border-b-2 font-medium px-1 py-2 text-sm text-base-content-secondary hover:border-gray-300 hover:text-gray-700">Servicios</button>
-                    <button data-tab="vehicle-types" class="tab-button shrink-0 border-b-2 font-medium px-1 py-2 text-sm text-base-content-secondary hover:border-gray-300 hover:text-gray-700">Tipos de Vehículo</button>
-                    <button data-tab="users" class="tab-button shrink-0 border-b-2 font-medium px-1 py-2 text-sm text-base-content-secondary hover:border-gray-300 hover:text-gray-700">Usuarios</button>
+                    <button data-tab="business"
+                        class="tab-button active shrink-0 border-b-2 font-medium px-1 py-2 text-sm text-base-content-secondary hover:border-gray-300 hover:text-gray-700">Negocio</button>
+                    <button data-tab="services"
+                        class="tab-button shrink-0 border-b-2 font-medium px-1 py-2 text-sm text-base-content-secondary hover:border-gray-300 hover:text-gray-700">Servicios</button>
+                    <button data-tab="vehicle-types"
+                        class="tab-button shrink-0 border-b-2 font-medium px-1 py-2 text-sm text-base-content-secondary hover:border-gray-300 hover:text-gray-700">Tipos
+                        de Vehículo</button>
+                    <button data-tab="users"
+                        class="tab-button shrink-0 border-b-2 font-medium px-1 py-2 text-sm text-base-content-secondary hover:border-gray-300 hover:text-gray-700">Usuarios</button>
                 </nav>
             </div>
 
@@ -418,27 +606,43 @@
                     <h3 class="font-semibold mb-3 text-base-content">Información del Negocio</h3>
                     <form id="business-info-form" class="space-y-4 bg-base-100 p-6 rounded-lg">
                         <div>
-                            <label for="business-name" class="block text-sm font-medium text-base-content">Nombre del Negocio</label>
-                            <input type="text" id="business-name" class="form-input focus-style mt-1 bg-base-200 input-bordered" placeholder="Estacionamiento Central">
+                            <label for="business-name" class="block text-sm font-medium text-base-content">Nombre del
+                                Negocio</label>
+                            <input type="text" id="business-name"
+                                class="form-input focus-style mt-1 bg-base-200 input-bordered"
+                                placeholder="Estacionamiento Central">
                         </div>
                         <div>
-                            <label for="business-address" class="block text-sm font-medium text-base-content">Domicilio</label>
-                            <input type="text" id="business-address" class="form-input focus-style mt-1 bg-base-200 input-bordered" placeholder="Av. Principal 123, Centro">
+                            <label for="business-address"
+                                class="block text-sm font-medium text-base-content">Domicilio</label>
+                            <input type="text" id="business-address"
+                                class="form-input focus-style mt-1 bg-base-200 input-bordered"
+                                placeholder="Av. Principal 123, Centro">
                         </div>
                         <div>
-                            <label for="business-phone" class="block text-sm font-medium text-base-content">Teléfono</label>
-                            <input type="tel" id="business-phone" class="form-input focus-style mt-1 bg-base-200 input-bordered" placeholder="55 1234 5678">
-                        </div>
-                         <div>
-                            <label for="business-overnight-rate" class="block text-sm font-medium text-base-content">Tarifa Nocturna ($)</label>
-                            <input type="number" id="business-overnight-rate" step="0.01" class="form-input focus-style mt-1 bg-base-200 input-bordered" placeholder="100.00">
+                            <label for="business-phone"
+                                class="block text-sm font-medium text-base-content">Teléfono</label>
+                            <input type="tel" id="business-phone"
+                                class="form-input focus-style mt-1 bg-base-200 input-bordered"
+                                placeholder="55 1234 5678">
                         </div>
                         <div>
-                            <label for="business-hours" class="block text-sm font-medium text-base-content">Horarios</label>
-                            <textarea id="business-hours" class="form-input focus-style mt-1 bg-base-200 input-bordered" rows="3" placeholder="Lunes a Viernes: 9:00 - 21:00&#10;Sábado: 10:00 - 20:00"></textarea>
+                            <label for="business-overnight-rate"
+                                class="block text-sm font-medium text-base-content">Tarifa Nocturna ($)</label>
+                            <input type="number" id="business-overnight-rate" step="0.01"
+                                class="form-input focus-style mt-1 bg-base-200 input-bordered" placeholder="100.00">
+                        </div>
+                        <div>
+                            <label for="business-hours"
+                                class="block text-sm font-medium text-base-content">Horarios</label>
+                            <textarea id="business-hours" class="form-input focus-style mt-1 bg-base-200 input-bordered"
+                                rows="3"
+                                placeholder="Lunes a Viernes: 9:00 - 21:00&#10;Sábado: 10:00 - 20:00"></textarea>
                         </div>
                         <div class="flex justify-end pt-4">
-                            <button type="submit" class="bg-primary text-primary-content font-bold py-2 px-6 rounded-lg hover:bg-primary-focus text-sm">Guardar Cambios</button>
+                            <button type="submit"
+                                class="bg-primary text-primary-content font-bold py-2 px-6 rounded-lg hover:bg-primary-focus text-sm">Guardar
+                                Cambios</button>
                         </div>
                     </form>
                 </div>
@@ -450,24 +654,34 @@
                             <div id="services-list-container" class="space-y-2"></div>
                         </div>
                         <div>
-                            <h3 id="service-form-title" class="font-semibold mb-3 text-base-content">Añadir Nuevo Servicio</h3>
+                            <h3 id="service-form-title" class="font-semibold mb-3 text-base-content">Añadir Nuevo
+                                Servicio</h3>
                             <form id="service-form" class="space-y-4 bg-base-100 p-4 rounded-lg">
                                 <input type="hidden" id="service-id-input">
                                 <div>
-                                    <label for="service-name-input" class="block text-sm font-medium text-base-content">Nombre</label>
-                                    <input type="text" id="service-name-input" class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
+                                    <label for="service-name-input"
+                                        class="block text-sm font-medium text-base-content">Nombre</label>
+                                    <input type="text" id="service-name-input"
+                                        class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
                                 </div>
                                 <div>
-                                    <label for="service-price-input" class="block text-sm font-medium text-base-content">Precio ($)</label>
-                                    <input type="number" id="service-price-input" step="0.01" class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
+                                    <label for="service-price-input"
+                                        class="block text-sm font-medium text-base-content">Precio ($)</label>
+                                    <input type="number" id="service-price-input" step="0.01"
+                                        class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
                                 </div>
                                 <div>
-                                    <label for="service-icon-select" class="block text-sm font-medium text-base-content">Icono</label>
-                                    <select id="service-icon-select" class="form-input focus-style mt-1 bg-base-200 input-bordered"></select>
+                                    <label for="service-icon-select"
+                                        class="block text-sm font-medium text-base-content">Icono</label>
+                                    <select id="service-icon-select"
+                                        class="form-input focus-style mt-1 bg-base-200 input-bordered"></select>
                                 </div>
                                 <div class="flex justify-end space-x-3">
-                                    <button type="button" id="cancel-service-edit-btn" class="hidden bg-base-300 text-base-content font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 text-sm">Cancelar</button>
-                                    <button type="submit" id="save-service-btn" class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus text-sm">Guardar Servicio</button>
+                                    <button type="button" id="cancel-service-edit-btn"
+                                        class="hidden bg-base-300 text-base-content font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 text-sm">Cancelar</button>
+                                    <button type="submit" id="save-service-btn"
+                                        class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus text-sm">Guardar
+                                        Servicio</button>
                                 </div>
                             </form>
                         </div>
@@ -481,20 +695,28 @@
                             <div id="vehicle-types-list-container" class="space-y-2"></div>
                         </div>
                         <div>
-                            <h3 id="vehicle-type-form-title" class="font-semibold mb-3 text-base-content">Añadir Nuevo Tipo</h3>
-                             <form id="vehicle-type-form" class="space-y-4 bg-base-100 p-4 rounded-lg">
+                            <h3 id="vehicle-type-form-title" class="font-semibold mb-3 text-base-content">Añadir Nuevo
+                                Tipo</h3>
+                            <form id="vehicle-type-form" class="space-y-4 bg-base-100 p-4 rounded-lg">
                                 <input type="hidden" id="vehicle-type-id-input">
                                 <div>
-                                    <label for="vehicle-type-name-input" class="block text-sm font-medium text-base-content">Nombre</label>
-                                    <input type="text" id="vehicle-type-name-input" class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
+                                    <label for="vehicle-type-name-input"
+                                        class="block text-sm font-medium text-base-content">Nombre</label>
+                                    <input type="text" id="vehicle-type-name-input"
+                                        class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
                                 </div>
                                 <div>
-                                    <label for="vehicle-type-rate-input" class="block text-sm font-medium text-base-content">Tarifa por Hora ($)</label>
-                                    <input type="number" id="vehicle-type-rate-input" step="0.01" class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
+                                    <label for="vehicle-type-rate-input"
+                                        class="block text-sm font-medium text-base-content">Tarifa por Hora ($)</label>
+                                    <input type="number" id="vehicle-type-rate-input" step="0.01"
+                                        class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
                                 </div>
                                 <div class="flex justify-end space-x-3">
-                                    <button type="button" id="cancel-vehicle-type-edit-btn" class="hidden bg-base-300 text-base-content font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 text-sm">Cancelar</button>
-                                    <button type="submit" id="save-vehicle-type-btn" class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus text-sm">Guardar Tipo</button>
+                                    <button type="button" id="cancel-vehicle-type-edit-btn"
+                                        class="hidden bg-base-300 text-base-content font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 text-sm">Cancelar</button>
+                                    <button type="submit" id="save-vehicle-type-btn"
+                                        class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus text-sm">Guardar
+                                        Tipo</button>
                                 </div>
                             </form>
                         </div>
@@ -508,27 +730,38 @@
                             <div id="users-list-container" class="space-y-2"></div>
                         </div>
                         <div>
-                            <h3 id="user-form-title" class="font-semibold mb-3 text-base-content">Añadir Nuevo Usuario</h3>
-                             <form id="user-form" class="space-y-4 bg-base-100 p-4 rounded-lg">
+                            <h3 id="user-form-title" class="font-semibold mb-3 text-base-content">Añadir Nuevo Usuario
+                            </h3>
+                            <form id="user-form" class="space-y-4 bg-base-100 p-4 rounded-lg">
                                 <input type="hidden" id="user-id-input">
                                 <div>
-                                    <label for="user-name-input" class="block text-sm font-medium text-base-content">Nombre de Usuario</label>
-                                    <input type="text" id="user-name-input" class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
+                                    <label for="user-name-input"
+                                        class="block text-sm font-medium text-base-content">Nombre de Usuario</label>
+                                    <input type="text" id="user-name-input"
+                                        class="form-input focus-style mt-1 bg-base-200 input-bordered" required>
                                 </div>
                                 <div>
-                                    <label for="user-role-select" class="block text-sm font-medium text-base-content">Rol</label>
-                                    <select id="user-role-select" class="form-input focus-style mt-1 bg-base-200 input-bordered">
+                                    <label for="user-role-select"
+                                        class="block text-sm font-medium text-base-content">Rol</label>
+                                    <select id="user-role-select"
+                                        class="form-input focus-style mt-1 bg-base-200 input-bordered">
                                         <option value="Administrador">Administrador</option>
                                         <option value="Vendedor">Vendedor</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="user-password-input" class="block text-sm font-medium text-base-content">Contraseña</label>
-                                    <input type="password" id="user-password-input" class="form-input focus-style mt-1 bg-base-200 input-bordered" placeholder="Dejar en blanco para no cambiar">
+                                    <label for="user-password-input"
+                                        class="block text-sm font-medium text-base-content">Contraseña</label>
+                                    <input type="password" id="user-password-input"
+                                        class="form-input focus-style mt-1 bg-base-200 input-bordered"
+                                        placeholder="Dejar en blanco para no cambiar">
                                 </div>
                                 <div class="flex justify-end space-x-3">
-                                    <button type="button" id="cancel-user-edit-btn" class="hidden bg-base-300 text-base-content font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 text-sm">Cancelar</button>
-                                    <button type="submit" id="save-user-btn" class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus text-sm">Guardar Usuario</button>
+                                    <button type="button" id="cancel-user-edit-btn"
+                                        class="hidden bg-base-300 text-base-content font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 text-sm">Cancelar</button>
+                                    <button type="submit" id="save-user-btn"
+                                        class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus text-sm">Guardar
+                                        Usuario</button>
                                 </div>
                             </form>
                         </div>
@@ -539,22 +772,31 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="confirm-modal" class="fixed inset-0 z-[100] flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
+    <div id="confirm-modal"
+        class="fixed inset-0 z-[100] flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
         <div class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-sm opacity-0 scale-95 transform">
             <h3 id="confirm-modal-title" class="text-lg font-bold text-base-content mb-4">Confirmar Acción</h3>
-            <p id="confirm-modal-message" class="text-base-content-secondary mb-6">¿Está seguro de que desea continuar?</p>
+            <p id="confirm-modal-message" class="text-base-content-secondary mb-6">¿Está seguro de que desea continuar?
+            </p>
             <div class="flex justify-end space-x-4">
-                <button id="confirm-modal-cancel-btn" class="bg-base-300 text-base-content font-bold py-2 px-6 rounded-lg hover:bg-opacity-80">Cancelar</button>
-                <button id="confirm-modal-confirm-btn" class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700">Confirmar</button>
+                <button id="confirm-modal-cancel-btn"
+                    class="bg-base-300 text-base-content font-bold py-2 px-6 rounded-lg hover:bg-opacity-80">Cancelar</button>
+                <button id="confirm-modal-confirm-btn"
+                    class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700">Confirmar</button>
             </div>
         </div>
     </div>
 
     <!-- Quick Charge Modal -->
-    <div id="quick-charge-modal" class="fixed inset-0 z-[100] flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
-        <div class="modal-content bg-base-200 rounded-2xl shadow-xl p-8 w-full max-w-md opacity-0 scale-95 transform text-center">
+    <div id="quick-charge-modal"
+        class="fixed inset-0 z-[100] flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-base-200 rounded-2xl shadow-xl p-8 w-full max-w-md opacity-0 scale-95 transform text-center">
             <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6">
-                <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
             </div>
             <h3 class="text-2xl font-bold text-base-content mb-2">Cobro Realizado</h3>
             <p class="text-base-content-secondary mb-6">El ticket ha sido pagado con éxito.</p>
@@ -570,1322 +812,53 @@
         </div>
     </div>
 
+    <!-- Shift Report (Corte de Caja) Modal -->
+    <div id="shift-report-modal"
+        class="fixed inset-0 z-[150] flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-md opacity-0 scale-95 transform flex flex-col max-h-[90vh]">
+            <h2 class="text-2xl font-bold mb-2 text-base-content flex-shrink-0">Corte de Caja</h2>
+            <p class="text-base-content-secondary mb-6" id="shift-report-user-info"></p>
+
+            <div id="shift-report-content" class="overflow-y-auto flex-grow pr-2 space-y-4">
+                <!-- El contenido del reporte se inyectará aquí -->
+            </div>
+
+            <div class="mt-8 flex justify-between items-center flex-shrink-0">
+                <button type="button" id="print-shift-report-btn"
+                    class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                    Imprimir
+                </button>
+                <button type="button" id="logout-confirm-btn"
+                    class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Floating Action Button -->
     <div id="fab-container" class="fab-container">
         <div id="fab-options" class="fab-options">
-             <!-- Los botones de opción se agregarán aquí dinámicamente -->
+            <!-- Los botones de opción se agregarán aquí dinámicamente -->
         </div>
-        <button id="fab-main" class="fab-main bg-primary text-primary-content w-16 h-16 rounded-full flex items-center justify-center shadow-lg"><svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg></button>
+        <button id="fab-main"
+            class="fab-main bg-primary text-primary-content w-16 h-16 rounded-full flex items-center justify-center shadow-lg"><svg
+                class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg></button>
     </div>
-    
+
     <!-- Contenedor para las notificaciones Toast -->
     <div id="toast-container" class="fixed top-5 right-5 z-[210] space-y-2 w-full max-w-xs"></div>
-    
+
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="js/main.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // =====================================================================
-            // ======================= INICIO: CONSTANTES Y VARIABLES =======================
-            // =====================================================================
-            const DB_NAME = 'parkingLotDB';
-            const DB_VERSION = 14; 
-            const TICKET_STORE_NAME = 'tickets';
-            const COUNTER_STORE_NAME = 'counters';
-            const SERVICES_STORE_NAME = 'services';
-            const SALES_STORE_NAME = 'sales';
-            const VEHICLE_TYPES_STORE_NAME = 'vehicleTypes';
-            const BUSINESS_INFO_STORE_NAME = 'businessInfo';
-            const USERS_STORE_NAME = 'users'; 
-            const EXPENSES_STORE_NAME = 'expenses';
-            const MONTH_NAMES = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
-
-            const BRANDS = { Carro: ["Nissan", "Chevrolet", "Volkswagen", "Toyota", "Honda", "Ford", "Kia", "Mazda", "Otro"], Moto: ["Italika", "Honda", "Yamaha", "Suzuki", "Bajaj", "Vento", "Otro"] };
-            const COLORS = ["Blanco", "Negro", "Gris", "Plata", "Rojo", "Azul", "Verde"];
-            
-            const horarios = {
-                0: { apertura: "10:00", cierre: "22:00" }, 1: { apertura: "09:00", cierre: "22:00" }, 2: { apertura: "09:00", cierre: "22:00" }, 3: { apertura: "09:00", cierre: "22:00" }, 4: { apertura: "09:00", cierre: "20:00" }, 5: { apertura: "09:00", cierre: "22:00" }, 6: { apertura: "09:00", cierre: "22:00" },
-            };
-
-            const ICONS = { 
-                restroom: `<svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 4.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM6 11h5v10H9v-5H6v-5zm7.5-6.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM13 11h5v5h-2v5h-3v-10z" /></svg>`, 
-                toilet_paper: `<svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 2c-1.654 0-3 1.346-3 3v14c0 1.654 1.346 3 3 3s3-1.346 3-3V5c0-1.654-1.346-3-3-3zm-1 14.5c0 .276-.224.5-.5.5s-.5-.224-.5-.5v-11c0-.276.224-.5.5-.5s.5.224.5.5v11zM2 6v14h11V6H2zm3 2h5v2H5V8zm0 4h5v2H5v-2z" /></svg>`,
-                key: `<svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 8.25a3.75 3.75 0 10-7.5 0 3.75 3.75 0 007.5 0zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path d="M12 1.5a.75.75 0 01.75.75v1.133a10.48 10.48 0 015.667 2.334.75.75 0 01-.833 1.242 9 9 0 00-11.168 0 .75.75 0 01-.833-1.242A10.48 10.48 0 0111.25 3.383V2.25a.75.75 0 01.75-.75z" /></svg>`
-            };
-            const ICON_OPTIONS = [ {id: 'restroom', name: 'Baño'}, {id: 'toilet_paper', name: 'Papel'}, {id: 'key', name: 'Llaves'} ];
-            
-            // DOM Elements
-            const loginScreen = document.getElementById('login-screen');
-            const mainApp = document.getElementById('main-app');
-            const loginForm = document.getElementById('login-form');
-            const logoutBtn = document.getElementById('logout-btn');
-            const sessionUsername = document.getElementById('session-username');
-            const sessionRole = document.getElementById('session-role');
-            const barcodeInput = document.getElementById('barcode-input'), ticketInfoSection = document.getElementById('ticket-info'), ticketStatusBanner = document.getElementById('ticket-status-banner'), hourlyDetails = document.getElementById('hourly-details'), pensionDetails = document.getElementById('pension-details'), vehiclePlateHourly = document.getElementById('vehicle-plate-hourly'), vehicleTypeHourly = document.getElementById('vehicle-type-hourly'), vehicleBrandHourly = document.getElementById('vehicle-brand-hourly'), vehicleColorHourly = document.getElementById('vehicle-color-hourly'), entryTimeHourly = document.getElementById('entry-time-hourly'), timeElapsedHourly = document.getElementById('time-elapsed-hourly'), exitTimeHourly = document.getElementById('exit-time-hourly'), totalCostHourly = document.getElementById('total-cost-hourly'), chargeButton = document.getElementById('charge-button'), vehiclePlatePension = document.getElementById('vehicle-plate-pension'), pensionTypeDetails = document.getElementById('pension-type-details'), endDatePension = document.getElementById('end-date-pension'), vehicleTypePension = document.getElementById('vehicle-type-pension'), vehicleBrandPension = document.getElementById('vehicle-brand-pension'), vehicleColorPension = document.getElementById('vehicle-color-pension'), newEntryBtn = document.getElementById('new-entry-btn'), newEntryModal = document.getElementById('new-entry-modal'), newEntryForm = document.getElementById('new-entry-form'), cancelEntryBtn = document.getElementById('cancel-entry-btn'), newPlateInput = document.getElementById('new-plate-input'), typeHourlyBtn = document.getElementById('type-hourly-btn'), typePensionBtn = document.getElementById('type-pension-btn'), typeOvernightBtn = document.getElementById('type-overnight-btn'), pensionFields = document.getElementById('pension-fields'), newPensionTypeInput = document.getElementById('new-pension-type-input'), newPensionEndDate = document.getElementById('new-pension-end-date'), newPensionAmount = document.getElementById('new-pension-amount'), vehicleTypeSelect = document.getElementById('vehicle-type-select'), newBrandSelect = document.getElementById('new-brand-select'), newColorInput = document.getElementById('new-color-input'), colorSuggestions = document.getElementById('color-suggestions'), plateLookupMsg = document.getElementById('plate-lookup-msg'), fabContainer = document.getElementById('fab-container'), fabMainBtn = document.getElementById('fab-main'), fabOptionsContainer = document.getElementById('fab-options');
-            const calculatorModal = document.getElementById('calculator-modal'), calculatorForm = document.getElementById('calculator-form'), calcVehicleType = document.getElementById('calc-vehicle-type'), calcEntryTime = document.getElementById('calc-entry-time'), calcExitTime = document.getElementById('calc-exit-time'), calculatorResults = document.getElementById('calculator-results'), calcBreakdown = document.getElementById('calc-breakdown'), calcTotalCost = document.getElementById('calc-total-cost'), cancelCalcBtn = document.getElementById('cancel-calc-btn');
-            const settingsModal = document.getElementById('settings-modal'), closeSettingsBtn = document.getElementById('close-settings-btn'), settingsTabs = document.getElementById('settings-tabs');
-            const confirmModal = document.getElementById('confirm-modal'), confirmModalMessage = document.getElementById('confirm-modal-message'), confirmModalCancelBtn = document.getElementById('confirm-modal-cancel-btn'), confirmModalConfirmBtn = document.getElementById('confirm-modal-confirm-btn');
-            const toastContainer = document.getElementById('toast-container');
-            const cancelPensionBtn = document.getElementById('cancel-pension-btn');
-            const pensionTypeContainer = document.getElementById('pension-type-container');
-            const pensionEndDateContainer = document.getElementById('pension-end-date-container');
-            const convertToOvernightBtn = document.getElementById('convert-to-overnight-btn');
-            const cancelTicketBtn = document.getElementById('cancel-ticket-btn');
-            const expensesModal = document.getElementById('expenses-modal'), closeExpensesBtn = document.getElementById('close-expenses-btn'), expenseForm = document.getElementById('expense-form'), expenseIdInput = document.getElementById('expense-id-input'), expenseDescriptionInput = document.getElementById('expense-description-input'), expenseAmountInput = document.getElementById('expense-amount-input'), cancelExpenseEditBtn = document.getElementById('cancel-expense-edit-btn'), saveExpenseBtn = document.getElementById('save-expense-btn'), expensesListContainer = document.getElementById('expenses-list-container'), expensesTotal = document.getElementById('expenses-total');
-            const serviceForm = document.getElementById('service-form'), serviceFormTitle = document.getElementById('service-form-title'), serviceIdInput = document.getElementById('service-id-input'), serviceNameInput = document.getElementById('service-name-input'), servicePriceInput = document.getElementById('service-price-input'), serviceIconSelect = document.getElementById('service-icon-select'), saveServiceBtn = document.getElementById('save-service-btn'), cancelServiceEditBtn = document.getElementById('cancel-service-edit-btn'), servicesListContainer = document.getElementById('services-list-container');
-            const vehicleTypeForm = document.getElementById('vehicle-type-form'), vehicleTypeFormTitle = document.getElementById('vehicle-type-form-title'), vehicleTypeIdInput = document.getElementById('vehicle-type-id-input'), vehicleTypeNameInput = document.getElementById('vehicle-type-name-input'), vehicleTypeRateInput = document.getElementById('vehicle-type-rate-input'), saveVehicleTypeBtn = document.getElementById('save-vehicle-type-btn'), cancelVehicleTypeEditBtn = document.getElementById('cancel-vehicle-type-edit-btn'), vehicleTypesListContainer = document.getElementById('vehicle-types-list-container');
-            const businessInfoForm = document.getElementById('business-info-form'), businessNameInput = document.getElementById('business-name'), businessAddressInput = document.getElementById('business-address'), businessPhoneInput = document.getElementById('business-phone'), businessHoursInput = document.getElementById('business-hours'), businessOvernightRateInput = document.getElementById('business-overnight-rate');
-            const userForm = document.getElementById('user-form'), userFormTitle = document.getElementById('user-form-title'), userIdInput = document.getElementById('user-id-input'), userNameInput = document.getElementById('user-name-input'), userRoleSelect = document.getElementById('user-role-select'), userPasswordInput = document.getElementById('user-password-input'), saveUserBtn = document.getElementById('save-user-btn'), cancelUserEditBtn = document.getElementById('cancel-user-edit-btn'), usersListContainer = document.getElementById('users-list-container');
-            const themeToggleBtn = document.getElementById('theme-toggle-btn');
-            const themePopover = document.getElementById('theme-popover');
-            const themeSelector = document.getElementById('theme-selector');
-            const quickChargeToggle = document.getElementById('quick-charge-toggle');
-            const quickChargeModal = document.getElementById('quick-charge-modal');
-
-            let db;
-            let currentUser = null;
-            let currentTicket = null;
-            let currentEntryType = 'hourly';
-            let vehicleTypesCache = [];
-            let businessInfoCache = {};
-            let usersCache = [];
-            let confirmCallback = null;
-            let searchDebounceTimer;
-            // ======================== FIN: CONSTANTES Y VARIABLES ========================
-
-            // =====================================================================
-            // ======================= INICIO: LÓGICA DE BASE DE DATOS =======================
-            // =====================================================================
-            function initDB() {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                request.onerror = (event) => console.error('DB Error:', event.target.errorCode);
-                request.onupgradeneeded = (event) => {
-                    db = event.target.result;
-                    if (!db.objectStoreNames.contains(TICKET_STORE_NAME)) {
-                        const ticketStore = db.createObjectStore(TICKET_STORE_NAME, { keyPath: 'barcode' });
-                        ticketStore.createIndex('plate_idx', 'plate', { unique: false });
-                    }
-                    if (!db.objectStoreNames.contains(COUNTER_STORE_NAME)) db.createObjectStore(COUNTER_STORE_NAME, { keyPath: 'counterId' });
-                    if (!db.objectStoreNames.contains(SERVICES_STORE_NAME)) db.createObjectStore(SERVICES_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                    if (!db.objectStoreNames.contains(SALES_STORE_NAME)) db.createObjectStore(SALES_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                    if (!db.objectStoreNames.contains(VEHICLE_TYPES_STORE_NAME)) db.createObjectStore(VEHICLE_TYPES_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                    if (!db.objectStoreNames.contains(BUSINESS_INFO_STORE_NAME)) db.createObjectStore(BUSINESS_INFO_STORE_NAME, { keyPath: 'id' });
-                    if (!db.objectStoreNames.contains(USERS_STORE_NAME)) {
-                        const userStore = db.createObjectStore(USERS_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                        userStore.createIndex('name_idx', 'name', { unique: true });
-                    }
-                    if (!db.objectStoreNames.contains(EXPENSES_STORE_NAME)) {
-                        const expenseStore = db.createObjectStore(EXPENSES_STORE_NAME, { keyPath: 'id', autoIncrement: true });
-                        expenseStore.createIndex('date_idx', 'date', { unique: false });
-                    }
-                };
-                request.onsuccess = (event) => {
-                    db = event.target.result;
-                    loadTheme(); // Cargar tema primero para la pantalla de login
-                    checkSession();
-                    Promise.all([seedServices(), seedVehicleTypes(), seedUsers()]).then(loadInitialData);
-                };
-            }
-            
-            function getObjectStore(storeName, mode) { return db.transaction(storeName, mode).objectStore(storeName); }
-            
-            async function seedData(storeName, data) {
-                 return new Promise((resolve, reject) => {
-                    const transaction = db.transaction(storeName, 'readwrite');
-                    const store = transaction.objectStore(storeName);
-                    const countRequest = store.count();
-
-                    countRequest.onsuccess = () => {
-                        if (countRequest.result === 0) {
-                            data.forEach(item => {
-                                store.add(item);
-                            });
-                        }
-                    };
-                    transaction.oncomplete = () => resolve();
-                    transaction.onerror = (e) => reject(e.target.error);
-                });
-            }
-
-            function seedServices() { return seedData(SERVICES_STORE_NAME, [ { name: 'Venta Baños', price: 5, icon: 'restroom' }, { name: 'Venta Papel', price: 10, icon: 'toilet_paper' } ]); }
-            function seedVehicleTypes() { return seedData(VEHICLE_TYPES_STORE_NAME, [ { name: 'Carro', hourlyRate: 15 }, { name: 'Moto', hourlyRate: 10 } ]); }
-            
-            async function seedUsers() {
-                const hashedPassword = await hashPassword('admin');
-                return new Promise((resolve, reject) => {
-                    const transaction = db.transaction(USERS_STORE_NAME, 'readwrite');
-                    const store = transaction.objectStore(USERS_STORE_NAME);
-                    const countRequest = store.count();
-                    countRequest.onsuccess = () => {
-                        if (countRequest.result === 0) {
-                            store.add({ name: 'admin', role: 'Administrador', password: hashedPassword });
-                        }
-                    };
-                    transaction.oncomplete = () => resolve();
-                    transaction.onerror = (e) => reject(e.target.error);
-                });
-            }
-            // ======================== FIN: LÓGICA DE BASE DE DATOS ========================
-            
-            // =====================================================================
-            // ======================= INICIO: LÓGICA DE TEMAS =======================
-            // =====================================================================
-            
-            const themes = [
-                { id: 'dorado', name: 'Dorado', colors: ['#D9A743', '#ffffff', '#f8fafc'] },
-                { id: 'bosque', name: 'Bosque', colors: ['#22c55e', '#f0fdf4', '#dcfce7'] },
-                { id: 'oceano', name: 'Océano', colors: ['#3b82f6', '#eff6ff', '#dbeafe'] },
-                { id: 'atardecer', name: 'Atardecer', colors: ['#f97316', '#fff7ed', '#ffedd5'] },
-                { id: 'nocturno', name: 'Nocturno', colors: ['#818cf8', '#1f2937', '#374151'] }
-            ];
-
-            function applyTheme(themeId) {
-                document.documentElement.setAttribute('data-theme', themeId);
-                localStorage.setItem('parkingTheme', themeId);
-                document.querySelectorAll('.theme-btn').forEach(btn => {
-                    const isSelected = btn.dataset.theme === themeId;
-                    btn.classList.toggle('ring-2', isSelected);
-                    btn.classList.toggle('ring-offset-2', isSelected);
-                    btn.classList.toggle('ring-[var(--primary)]', isSelected);
-                });
-            }
-
-            function loadTheme() {
-                const savedTheme = localStorage.getItem('parkingTheme') || 'dorado';
-                applyTheme(savedTheme);
-            }
-
-            function populateThemeSelector() {
-                themeSelector.innerHTML = '';
-                themes.forEach(theme => {
-                    const button = document.createElement('button');
-                    button.className = 'theme-btn p-1 rounded-md focus:outline-none';
-                    button.dataset.theme = theme.id;
-                    button.title = theme.name;
-                    button.innerHTML = `
-                        <div class="flex justify-center items-center space-x-1 h-8 w-full rounded" style="background-color: ${theme.colors[1]}">
-                            <span class="w-5 h-5 rounded-full" style="background-color: ${theme.colors[0]}"></span>
-                            <span class="w-5 h-5 rounded-full" style="background-color: ${theme.colors[2]}"></span>
-                        </div>
-                    `;
-                    button.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        applyTheme(theme.id);
-                        toggleThemePopover(false);
-                    });
-                    themeSelector.appendChild(button);
-                });
-                const currentTheme = localStorage.getItem('parkingTheme') || 'dorado';
-                applyTheme(currentTheme);
-            }
-            
-            function toggleThemePopover(show) {
-                if (show) {
-                    themePopover.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
-                } else {
-                    themePopover.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
-                }
-            }
-
-            // ======================== FIN: LÓGICA DE TEMAS ========================
-
-            // =====================================================================
-            // ======================= INICIO: LÓGICA DE SESIÓN =======================
-            // =====================================================================
-
-            function checkSession() {
-                const userSession = sessionStorage.getItem('parkingUser');
-                if (userSession) {
-                    currentUser = JSON.parse(userSession);
-                    showMainApp();
-                } else {
-                    showLoginScreen();
-                }
-            }
-
-            async function handleLogin(e) {
-                e.preventDefault();
-                const username = document.getElementById('login-username').value.trim();
-                const password = document.getElementById('login-password').value;
-                const hashedPassword = await hashPassword(password);
-
-                const index = getObjectStore(USERS_STORE_NAME, 'readonly').index('name_idx');
-                const request = index.get(username);
-
-                request.onsuccess = () => {
-                    const user = request.result;
-                    if (user && user.password === hashedPassword) {
-                        currentUser = { name: user.name, role: user.role };
-                        sessionStorage.setItem('parkingUser', JSON.stringify(currentUser));
-                        showMainApp();
-                        loginForm.reset();
-                    } else {
-                        showToast('Usuario o contraseña incorrectos.', 'error');
-                    }
-                };
-                request.onerror = () => showToast('Error al intentar iniciar sesión.', 'error');
-            }
-
-            function handleLogout() {
-                currentUser = null;
-                sessionStorage.removeItem('parkingUser');
-                showLoginScreen();
-            }
-            
-            function showLoginScreen() {
-                loginScreen.classList.remove('opacity-0', 'pointer-events-none');
-                mainApp.classList.add('hidden');
-            }
-
-            function showMainApp() {
-                loginScreen.classList.add('opacity-0', 'pointer-events-none');
-                mainApp.classList.remove('hidden');
-                sessionUsername.textContent = currentUser.name;
-                sessionRole.textContent = currentUser.role;
-                barcodeInput.focus();
-            }
-
-            // ======================== FIN: LÓGICA DE SESIÓN ========================
-
-            // =====================================================================
-            // ======================= INICIO: CARGA DE DATOS INICIAL =======================
-            // =====================================================================
-            function loadInitialData() {
-                loadFabOptions();
-                loadVehicleTypesFromDB();
-                loadBusinessInfo();
-                loadUsersFromDB();
-                populateThemeSelector();
-                populateSelect(serviceIconSelect, ICON_OPTIONS, 'id', 'name');
-                // Load quick charge preference
-                const quickChargePref = localStorage.getItem('quickChargeMode') === 'true';
-                quickChargeToggle.checked = quickChargePref;
-            }
-
-            function loadFabOptions() {
-                const store = getObjectStore(SERVICES_STORE_NAME, 'readonly');
-                store.getAll().onsuccess = (event) => {
-                    const services = event.target.result;
-                    fabOptionsContainer.innerHTML = ''; 
-                    
-                    const expensesBtn = document.createElement('button');
-                    expensesBtn.id = 'expenses-btn';
-                    expensesBtn.className = 'fab-option bg-base-200 text-green-600 w-14 h-14 rounded-full flex items-center justify-center';
-                    expensesBtn.title = 'Registrar Gasto';
-                    expensesBtn.innerHTML = `<svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-                    expensesBtn.addEventListener('click', () => {
-                        toggleModal(expensesModal, true);
-                        displayExpenses();
-                        fabContainer.classList.remove('active');
-                    });
-                    fabOptionsContainer.appendChild(expensesBtn);
-                    
-                    services.forEach(service => fabOptionsContainer.appendChild(createServiceButton(service)));
-                    displayServicesInSettings(services);
-
-                    const calculatorBtn = document.createElement('button');
-                    calculatorBtn.id = 'calculator-btn';
-                    calculatorBtn.className = 'fab-option bg-base-200 text-primary w-14 h-14 rounded-full flex items-center justify-center';
-                    calculatorBtn.title = 'Calculadora';
-                    calculatorBtn.innerHTML = `<svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm0 3h.008v.008H8.25v-.008zm3-6h.008v.008H11.25v-.008zm0 3h.008v.008H11.25v-.008zm0 3h.008v.008H11.25v-.008zm3-6h.008v.008H14.25v-.008zm0 3h.008v.008H14.25v-.008zM4.5 21V3.75A1.75 1.75 0 016.25 2h11.5A1.75 1.75 0 0119.5 3.75V21a1.75 1.75 0 01-1.75 1.75H6.25A1.75 1.75 0 014.5 21z" /></svg>`;
-                    calculatorBtn.addEventListener('click', () => {
-                        calculatorResults.classList.add('hidden');
-                        calculatorForm.reset();
-                        toggleModal(calculatorModal, true);
-                        fabContainer.classList.remove('active');
-                    });
-                    fabOptionsContainer.appendChild(calculatorBtn);
-                    
-                    const settingsBtn = document.createElement('button');
-                    settingsBtn.id = 'settings-btn';
-                    settingsBtn.className = 'fab-option bg-base-200 text-base-content-secondary w-14 h-14 rounded-full flex items-center justify-center';
-                    settingsBtn.title = 'Configuración';
-                    settingsBtn.innerHTML = `<svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.946 1.55l-.26 1.038a.75.75 0 00.44 1.043l1.1-.368a.75.75 0 01.942.233l.25.433a.75.75 0 01-.233.942l-1.1.368a.75.75 0 00-.44 1.043l.26 1.038c.247.887 1.03.1.55 1.946h2.844c.917 0 1.699-.663 1.946-1.55l.26-1.038a.75.75 0 00-.44-1.043l-1.1.368a.75.75 0 01-.942-.233l-.25-.433a.75.75 0 01.233-.942l1.1-.368a.75.75 0 00.44-1.043l-.26-1.038A1.99 1.99 0 0013.922 2.25H11.08zM12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" clip-rule="evenodd" /><path d="M1.5 9.75a.75.75 0 01.75-.75h1.316a.75.75 0 01.75.75v3a.75.75 0 01-.75.75H2.25a.75.75 0 01-.75-.75v-3zM20.25 9.75a.75.75 0 01.75-.75h1.316a.75.75 0 01.75.75v3a.75.75 0 01-.75.75h-1.316a.75.75 0 01-.75-.75v-3zM9.75 1.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75v1.316a.75.75 0 01-.75.75h-3a.75.75 0 01-.75-.75V1.5zM9.75 20.25a.75.75 0 01.75-.75h3a.75.75 0 01.75.75v1.316a.75.75 0 01-.75.75h-3a.75.75 0 01-.75-.75V20.25z" /></svg>`;
-                    settingsBtn.addEventListener('click', () => {
-                        toggleModal(settingsModal, true);
-                        fabContainer.classList.remove('active');
-                    });
-                    fabOptionsContainer.appendChild(settingsBtn);
-                };
-            }
-
-            function loadVehicleTypesFromDB() {
-                getObjectStore(VEHICLE_TYPES_STORE_NAME, 'readonly').getAll().onsuccess = (event) => {
-                    vehicleTypesCache = event.target.result;
-                    populateSelect(vehicleTypeSelect, vehicleTypesCache.map(v => ({id: v.id, name: v.name})));
-                    populateSelect(calcVehicleType, vehicleTypesCache.map(v => ({id: v.id, name: v.name})));
-                    updateBrandSelect();
-                    displayVehicleTypesInSettings(vehicleTypesCache);
-                };
-            }
-            
-            function loadBusinessInfo() {
-                getObjectStore(BUSINESS_INFO_STORE_NAME, 'readonly').get(1).onsuccess = (event) => {
-                    const info = event.target.result;
-                    if (info) {
-                        businessInfoCache = info;
-                        businessNameInput.value = info.name || '';
-                        businessAddressInput.value = info.address || '';
-                        businessPhoneInput.value = info.phone || '';
-                        businessHoursInput.value = info.hours || '';
-                        businessOvernightRateInput.value = info.overnightRate || '';
-                    }
-                };
-            }
-
-            function loadUsersFromDB() {
-                getObjectStore(USERS_STORE_NAME, 'readonly').getAll().onsuccess = (event) => {
-                    usersCache = event.target.result;
-                    displayUsersInSettings(usersCache);
-                };
-            }
-            // ======================== FIN: CARGA DE DATOS INICIAL ========================
-
-            // =====================================================================
-            // ======================= INICIO: FUNCIONES DE UI GENERALES =======================
-            // =====================================================================
-            function showToast(message, type = 'info') {
-                const toast = document.createElement('div');
-                toast.className = 'toast p-4 rounded-lg shadow-lg flex items-center space-x-3 w-full';
-                
-                const icons = {
-                    success: `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
-                    error: `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
-                    info: `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
-                };
-
-                const colors = {
-                    success: 'bg-green-500',
-                    error: 'bg-red-500',
-                    info: 'bg-slate-800'
-                };
-
-                toast.classList.add(colors[type]);
-                toast.innerHTML = `
-                    <div>${icons[type]}</div>
-                    <p class="text-white font-medium text-sm">${message}</p>
-                `;
-
-                toastContainer.appendChild(toast);
-                
-                setTimeout(() => { toast.classList.add('show'); }, 10);
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    toast.addEventListener('transitionend', () => toast.remove());
-                }, 4000);
-            }
-
-            function createServiceButton(service) {
-                const button = document.createElement('button');
-                button.className = `fab-option bg-base-200 text-primary w-14 h-14 rounded-full flex items-center justify-center`;
-                button.title = `${service.name} ($${service.price})`;
-                button.innerHTML = ICONS[service.icon] || '';
-                button.addEventListener('click', () => registerSale(service));
-                return button;
-            }
-
-            function registerSale(service) {
-                const saleData = { 
-                    serviceName: service.name, 
-                    price: service.price, 
-                    timestamp: new Date(),
-                    user: currentUser.name 
-                };
-                getObjectStore(SALES_STORE_NAME, 'readwrite').add(saleData).onsuccess = () => showToast(`${service.name} registrada.`, 'success');
-                fabContainer.classList.remove('active');
-            }
-
-            function resetUI() { 
-                barcodeInput.value = '';
-                ticketInfoSection.classList.add('hidden'); 
-                barcodeInput.focus(); 
-                currentTicket = null; 
-            }
-            function formatDateTime(date) { return date ? new Date(date).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) : 'N/A'; }
-            function formatDate(date) { return date ? new Date(date).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'; }
-            function formatInputDate(date) {
-                if (!date) return '';
-                const d = new Date(date);
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-            function formatElapsedTime(ms) { if (ms < 0) ms = 0; const totalMinutes = Math.floor(ms / 60000); return `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`; }
-
-            function toggleModal(modal, show) {
-                const content = modal.querySelector('.modal-content');
-                if (show) {
-                    modal.classList.remove('opacity-0', 'pointer-events-none');
-                    if (content) content.classList.remove('opacity-0', 'scale-95');
-                } else {
-                    modal.classList.add('opacity-0');
-                    if (content) content.classList.add('opacity-0', 'scale-95');
-                    setTimeout(() => modal.classList.add('pointer-events-none'), 200);
-                }
-            }
-            
-            function showConfirmModal(message, onConfirm) {
-                confirmModalMessage.innerHTML = message;
-                confirmCallback = onConfirm;
-                toggleModal(confirmModal, true);
-            }
-
-            function populateSelect(selectElement, items, valueKey = 'id', textKey = 'name') {
-                selectElement.innerHTML = '';
-                items.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item[valueKey];
-                    option.textContent = item[textKey];
-                    selectElement.appendChild(option);
-                });
-            }
-            // ======================== FIN: FUNCIONES DE UI GENERALES ========================
-
-            // =====================================================================
-            // ======================= INICIO: LÓGICA DE GASTOS (EXPENSES) =======================
-            // =====================================================================
-
-            function displayExpenses() {
-                const today = new Date().toISOString().split('T')[0];
-                const range = IDBKeyRange.only(today);
-                const index = getObjectStore(EXPENSES_STORE_NAME, 'readonly').index('date_idx');
-                
-                let total = 0;
-                expensesListContainer.innerHTML = '';
-
-                index.openCursor(range).onsuccess = (event) => {
-                    const cursor = event.target.result;
-                    if (cursor) {
-                        const expense = cursor.value;
-                        total += expense.amount;
-                        const div = document.createElement('div');
-                        div.className = 'flex items-center justify-between bg-base-200 p-3 rounded-lg border border-theme';
-                        div.innerHTML = `
-                            <div>
-                                <p class="font-medium text-base-content">${expense.description}</p>
-                                <p class="text-sm text-base-content-secondary">$${expense.amount.toFixed(2)} (Registrado por: ${expense.user})</p>
-                            </div>
-                            <div class="space-x-2">
-                                <button class="edit-expense-btn text-primary hover:text-primary-focus text-sm font-medium" data-id="${expense.id}">Editar</button>
-                                <button class="delete-expense-btn text-red-600 hover:text-red-800 text-sm font-medium" data-id="${expense.id}">Eliminar</button>
-                            </div>
-                        `;
-                        expensesListContainer.appendChild(div);
-                        cursor.continue();
-                    } else {
-                        if (expensesListContainer.innerHTML === '') {
-                             expensesListContainer.innerHTML = '<p class="text-base-content-secondary text-sm text-center">No hay gastos registrados hoy.</p>';
-                        }
-                        expensesTotal.textContent = `$${total.toFixed(2)}`;
-                    }
-                };
-            }
-
-            function handleSaveExpense(e) {
-                e.preventDefault();
-                const id = parseInt(expenseIdInput.value);
-                const expenseData = {
-                    description: expenseDescriptionInput.value.trim(),
-                    amount: parseFloat(expenseAmountInput.value),
-                    date: new Date().toISOString().split('T')[0],
-                    user: currentUser.name
-                };
-
-                const store = getObjectStore(EXPENSES_STORE_NAME, 'readwrite');
-                const request = id ? store.put({ ...expenseData, id }) : store.add(expenseData);
-                
-                request.onsuccess = () => {
-                    showToast(`Gasto ${id ? 'actualizado' : 'guardado'} con éxito.`, 'success');
-                    resetExpenseForm();
-                    displayExpenses();
-                };
-                request.onerror = () => showToast('Error al guardar el gasto.', 'error');
-            }
-
-            function handleEditExpense(id) {
-                getObjectStore(EXPENSES_STORE_NAME, 'readonly').get(id).onsuccess = (event) => {
-                    const expense = event.target.result;
-                    expenseIdInput.value = expense.id;
-                    expenseDescriptionInput.value = expense.description;
-                    expenseAmountInput.value = expense.amount;
-                    saveExpenseBtn.textContent = 'Actualizar Gasto';
-                    cancelExpenseEditBtn.classList.remove('hidden');
-                };
-            }
-
-            function handleDeleteExpense(id) {
-                showConfirmModal('¿Está seguro de que desea eliminar este gasto?', () => {
-                    getObjectStore(EXPENSES_STORE_NAME, 'readwrite').delete(id).onsuccess = () => {
-                        showToast('Gasto eliminado.', 'success');
-                        resetExpenseForm();
-                        displayExpenses();
-                    };
-                });
-            }
-            
-            function resetExpenseForm() {
-                expenseForm.reset();
-                expenseIdInput.value = '';
-                saveExpenseBtn.textContent = 'Guardar Gasto';
-                cancelExpenseEditBtn.classList.add('hidden');
-            }
-
-            // ======================== FIN: LÓGICA DE GASTOS (EXPENSES) ========================
-
-
-            // =====================================================================
-            // ======================= INICIO: LÓGICA DE ENTRADA DE VEHÍCULOS =======================
-            // =====================================================================
-            function setEntryType(type) {
-                currentEntryType = type;
-                const buttons = [typeHourlyBtn, typeOvernightBtn, typePensionBtn];
-                buttons.forEach(btn => {
-                    const btnType = btn.id.split('-')[1];
-                    const isActive = btnType === type;
-                    btn.classList.toggle('bg-primary', isActive);
-                    btn.classList.toggle('text-primary-content', isActive);
-                    btn.classList.toggle('text-base-content-secondary', !isActive);
-                });
-
-                const isPaidStay = type === 'pension' || type === 'overnight';
-                pensionFields.classList.toggle('show', isPaidStay);
-                newPensionAmount.required = isPaidStay;
-                newPensionAmount.readOnly = type === 'overnight';
-                newPensionAmount.value = type === 'overnight' ? (businessInfoCache.overnightRate || '') : '';
-
-
-                const isLongTermPension = type === 'pension';
-                pensionTypeContainer.style.display = isLongTermPension ? 'block' : 'none';
-                pensionEndDateContainer.style.display = isLongTermPension ? 'block' : 'none';
-                newPensionTypeInput.required = isLongTermPension;
-                newPensionEndDate.required = isLongTermPension;
-            }
-
-            function updateBrandSelect() {
-                if(vehicleTypesCache.length === 0) return;
-                const selectedTypeId = parseInt(vehicleTypeSelect.value);
-                const selectedType = vehicleTypesCache.find(v => v.id === selectedTypeId);
-                populateSelect(newBrandSelect, selectedType && BRANDS[selectedType.name] ? BRANDS[selectedType.name].map(name => ({id: name, name})) : [{id: 'Otro', name: 'Otro'}], 'id', 'name');
-            }
-            
-            function populateColorSuggestions() {
-                colorSuggestions.innerHTML = '';
-                COLORS.forEach(color => colorSuggestions.appendChild(Object.assign(document.createElement('option'), { value: color })));
-            }
-
-            async function findPreviousEntryByPlate() {
-                const plate = newPlateInput.value.trim().toUpperCase();
-                plateLookupMsg.textContent = '';
-                if (!plate) return;
-                const index = getObjectStore(TICKET_STORE_NAME, 'readonly').index('plate_idx');
-                const request = index.getAll(plate);
-                request.onsuccess = () => {
-                    if (request.result && request.result.length > 0) {
-                        const lastEntry = request.result.sort((a, b) => new Date(b.entryTime) - new Date(a.entryTime))[0];
-                        vehicleTypeSelect.value = lastEntry.vehicleTypeId;
-                        updateBrandSelect();
-                        setTimeout(() => {
-                            newBrandSelect.value = lastEntry.brand;
-                            newColorInput.value = lastEntry.color;
-                            if (lastEntry.type === 'pension') {
-                                newPensionTypeInput.value = lastEntry.pensionTypeName || '';
-                                newPensionEndDate.value = formatInputDate(lastEntry.pensionEndDate);
-                            }
-                        }, 50);
-                        plateLookupMsg.textContent = 'Datos rellenados';
-                        plateLookupMsg.className = 'absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-green-600';
-                        setTimeout(() => plateLookupMsg.textContent = '', 2500);
-                    }
-                };
-            }
-
-            async function generateNewTicketId(type) {
-                return new Promise((resolve, reject) => {
-                    const prefix = (type === 'hourly') ? 'TKT' : 'PEN';
-                    const monthYear = `${MONTH_NAMES[new Date().getMonth()]}-${new Date().getFullYear()}`;
-                    const counterId = `${prefix}-${monthYear}`;
-                    const counterStore = getObjectStore(COUNTER_STORE_NAME, 'readwrite');
-                    const request = counterStore.get(counterId);
-                    request.onsuccess = () => {
-                        let nextId = request.result ? request.result.lastId + 1 : 1;
-                        counterStore.put({ counterId: counterId, lastId: nextId });
-                        resolve(`${prefix}-${monthYear.substring(0,3)}-${String(nextId).padStart(4, '0')}`);
-                    };
-                    request.onerror = (e) => reject(e.target.error);
-                });
-            }
-
-            function resetNewEntryForm() {
-                newEntryForm.reset();
-                setEntryType('hourly');
-            }
-
-            async function registerEntry(e) {
-                e.preventDefault();
-                try {
-                    const newBarcode = await generateNewTicketId(currentEntryType);
-                    const selectedVehicleType = vehicleTypesCache.find(v => v.id === parseInt(vehicleTypeSelect.value));
-                    const newTicket = { 
-                        barcode: newBarcode, 
-                        plate: newPlateInput.value.trim().toUpperCase(), 
-                        entryTime: new Date(), 
-                        status: 'active', 
-                        type: currentEntryType, 
-                        vehicleTypeId: selectedVehicleType.id, 
-                        vehicleTypeName: selectedVehicleType.name, 
-                        brand: newBrandSelect.value, 
-                        color: newColorInput.value,
-                        userEntry: currentUser.name
-                    };
-                    
-                    if (currentEntryType === 'pension' || currentEntryType === 'overnight') {
-                        newTicket.cost = parseFloat(newPensionAmount.value);
-                        newTicket.status = 'paid';
-                        newTicket.userPayment = currentUser.name;
-                        if(currentEntryType === 'pension') {
-                            newTicket.pensionTypeName = newPensionTypeInput.value.trim();
-                            newTicket.pensionEndDate = new Date(newPensionEndDate.value + 'T00:00:00');
-                        } else {
-                            newTicket.pensionTypeName = 'Pensión Nocturna';
-                            const nextDay = new Date();
-                            nextDay.setDate(nextDay.getDate() + 1);
-                            newTicket.pensionEndDate = nextDay;
-                        }
-                    } else {
-                        newTicket.exitTime = null;
-                        newTicket.cost = null;
-                    }
-                    getObjectStore(TICKET_STORE_NAME, 'readwrite').add(newTicket).onsuccess = () => { 
-                        showToast(`Entrada registrada: ${newBarcode}`, 'success'); 
-                        toggleModal(newEntryModal, false); 
-                        resetUI();
-                        resetNewEntryForm();
-                    };
-                } catch (error) { showToast('Error al registrar la entrada.', 'error'); console.error(error); }
-            }
-            // ======================== FIN: LÓGICA DE ENTRADA DE VEHÍCULOS ========================
-
-            // =====================================================================
-            // ======================= INICIO: LÓGICA DE TICKETS Y COBRO =======================
-            // =====================================================================
-            function findTicket(barcode) {
-                if (!db || !barcode) {
-                    ticketInfoSection.classList.add('hidden');
-                    return;
-                }
-                getObjectStore(TICKET_STORE_NAME, 'readonly').get(barcode).onsuccess = (event) => {
-                    const ticket = event.target.result;
-                    if (ticket) {
-                        currentTicket = ticket;
-                        if (quickChargeToggle.checked && ticket.status === 'active' && ticket.type === 'hourly') {
-                            markTicketAsPaid();
-                        } else {
-                            displayTicketInfo(ticket);
-                            ticketInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                    } else {
-                        showToast('Ticket no encontrado.', 'error');
-                        ticketInfoSection.classList.add('hidden');
-                    }
-                };
-            }
-            
-            function displayTicketInfo(ticket) {
-                ticketInfoSection.classList.remove('hidden');
-                cancelPensionBtn.classList.add('hidden');
-                convertToOvernightBtn.classList.add('hidden');
-                cancelTicketBtn.classList.add('hidden');
-
-                if (ticket.type === 'pension' || ticket.type === 'overnight') {
-                    hourlyDetails.classList.add('hidden');
-                    pensionDetails.classList.remove('hidden');
-                    vehiclePlatePension.textContent = ticket.plate;
-                    vehicleTypePension.textContent = ticket.vehicleTypeName;
-                    vehicleBrandPension.textContent = ticket.brand;
-                    vehicleColorPension.textContent = ticket.color;
-                    pensionTypeDetails.textContent = ticket.pensionTypeName;
-
-                    const today = new Date().setHours(0,0,0,0);
-                    const endDate = new Date(ticket.pensionEndDate).setHours(0,0,0,0);
-                    ticketStatusBanner.textContent = today > endDate ? 'Pensión Vencida' : 'Pensión Vigente';
-                    ticketStatusBanner.className = `p-3 rounded-lg mb-4 text-center font-bold ${today > endDate ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
-                    ticketStatusBanner.classList.remove('hidden');
-                    
-                    if (ticket.type === 'overnight') {
-                        const expirationDate = new Date(ticket.pensionEndDate);
-                        const expirationDayOfWeek = expirationDate.getDay();
-                        const openingTimeStr = horarios[expirationDayOfWeek].apertura;
-                        const exactExpirationTime = parseTime(expirationDate, openingTimeStr);
-                        exactExpirationTime.setMinutes(exactExpirationTime.getMinutes() + 30);
-                        endDatePension.textContent = formatDateTime(exactExpirationTime);
-                        cancelPensionBtn.classList.remove('hidden');
-                    } else {
-                        endDatePension.textContent = formatDate(ticket.pensionEndDate);
-                    }
-                } else {
-                    pensionDetails.classList.add('hidden');
-                    hourlyDetails.classList.remove('hidden');
-                    vehiclePlateHourly.textContent = ticket.plate;
-                    vehicleTypeHourly.textContent = ticket.vehicleTypeName;
-                    vehicleBrandHourly.textContent = ticket.brand;
-                    vehicleColorHourly.textContent = ticket.color;
-                    entryTimeHourly.textContent = formatDateTime(ticket.entryTime);
-                    if (ticket.status === 'paid') {
-                        timeElapsedHourly.textContent = formatElapsedTime(new Date(ticket.exitTime).getTime() - new Date(ticket.entryTime).getTime());
-                        exitTimeHourly.textContent = formatDateTime(ticket.exitTime);
-                        totalCostHourly.textContent = `$${ticket.cost.toFixed(2)}`;
-                        chargeButton.classList.add('hidden');
-                        ticketStatusBanner.textContent = `Pagado por ${ticket.userPayment || 'N/A'}.`;
-                        ticketStatusBanner.className = 'p-3 rounded-lg mb-4 text-center font-bold bg-amber-100 text-amber-800';
-                        ticketStatusBanner.classList.remove('hidden');
-                    } else if (ticket.status === 'cancelled') {
-                        timeElapsedHourly.textContent = '-';
-                        exitTimeHourly.textContent = '-';
-                        totalCostHourly.textContent = '$0.00';
-                        chargeButton.classList.add('hidden');
-                        ticketStatusBanner.textContent = `CANCELADO por ${ticket.userCancel || 'N/A'}`;
-                        ticketStatusBanner.className = 'p-3 rounded-lg mb-4 text-center font-bold bg-red-100 text-red-800';
-                        ticketStatusBanner.classList.remove('hidden');
-                    } else {
-                        timeElapsedHourly.textContent = formatElapsedTime(new Date().getTime() - new Date(ticket.entryTime).getTime());
-                        exitTimeHourly.textContent = 'Aún en estacionamiento';
-                        totalCostHourly.textContent = 'Calculando...';
-                        chargeButton.classList.remove('hidden');
-                        convertToOvernightBtn.classList.remove('hidden');
-                        cancelTicketBtn.classList.remove('hidden');
-                        ticketStatusBanner.classList.add('hidden');
-                    }
-                }
-            }
-
-            function showQuickChargeModal(ticket, totalCost) {
-                document.getElementById('quick-charge-amount').textContent = `$${totalCost.toFixed(2)}`;
-                document.getElementById('quick-charge-ticket-id').textContent = ticket.barcode;
-                document.getElementById('quick-charge-plate').textContent = ticket.plate;
-                document.getElementById('quick-charge-time').textContent = formatElapsedTime(new Date(ticket.exitTime) - new Date(ticket.entryTime));
-                toggleModal(quickChargeModal, true);
-
-                setTimeout(() => {
-                    toggleModal(quickChargeModal, false);
-                    resetUI();
-                }, 4000); // El modal se oculta después de 4 segundos
-            }
-
-            async function markTicketAsPaid() {
-                if (!db || !currentTicket || currentTicket.status !== 'active') return;
-                try {
-                    const vehicleType = vehicleTypesCache.find(v => v.id === currentTicket.vehicleTypeId);
-                    if (!vehicleType) throw new Error("Vehicle type not found.");
-                    
-                    const { totalCost } = calculateStayCost(new Date(currentTicket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
-
-                    const updatedTicket = { ...currentTicket, exitTime: new Date(), status: 'paid', cost: totalCost, userPayment: currentUser.name };
-                    
-                    getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
-                        currentTicket = updatedTicket;
-                        if (quickChargeToggle.checked) {
-                            showQuickChargeModal(updatedTicket, totalCost);
-                        } else {
-                            showToast(`Ticket ${updatedTicket.barcode} cobrado: $${totalCost.toFixed(2)}`, 'success');
-                            displayTicketInfo(updatedTicket);
-                            setTimeout(() => { resetUI(); }, 4000);
-                        }
-                    };
-                } catch (error) { showToast('Error al procesar el pago.', 'error'); console.error(error); }
-            }
-            
-            async function handleConvertToOvernight() {
-                if (!currentTicket || currentTicket.type !== 'hourly' || currentTicket.status !== 'active') return;
-
-                const vehicleType = vehicleTypesCache.find(v => v.id === currentTicket.vehicleTypeId);
-                if (!vehicleType) { showToast('Error: Tipo de vehículo no encontrado.', 'error'); return; }
-                if (!businessInfoCache.overnightRate) { showToast('Por favor, configure la "Tarifa Nocturna" en los ajustes del negocio.', 'error'); return; }
-
-                const { totalCost: hourlyCost } = calculateStayCost(new Date(currentTicket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
-                const overnightRate = parseFloat(businessInfoCache.overnightRate);
-                const totalToPayNow = hourlyCost + overnightRate;
-
-                const message = `<div class="text-left space-y-2"><p class="flex justify-between"><span>Cargo por horas ya usadas:</span> <span class="font-semibold">$${hourlyCost.toFixed(2)}</span></p><p class="flex justify-between"><span>+ Tarifa de Pensión Nocturna:</span> <span class="font-semibold">$${overnightRate.toFixed(2)}</span></p><hr><p class="flex justify-between text-lg"><strong>Total a Pagar AHORA:</strong> <strong class="text-green-600">$${totalToPayNow.toFixed(2)}</strong></p></div>`;
-
-                showConfirmModal(message, () => {
-                    const nextDay = new Date();
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    const updatedTicket = { ...currentTicket, status: 'paid', cost: totalToPayNow, type: 'overnight', pensionTypeName: 'Pensión Nocturna', pensionEndDate: nextDay, exitTime: null, userPayment: currentUser.name };
-                    getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
-                        showToast('Se cambió a Pensión Nocturna exitosamente.', 'success');
-                        currentTicket = updatedTicket;
-                        displayTicketInfo(updatedTicket);
-                        setTimeout(() => { resetUI(); }, 4000);
-                    };
-                });
-            }
-
-            async function handleCancelPension() {
-                if (!currentTicket || currentTicket.type !== 'overnight') return;
-
-                const vehicleType = vehicleTypesCache.find(v => v.id === currentTicket.vehicleTypeId);
-                if (!vehicleType) { showToast('Error: Tipo de vehículo no encontrado.', 'error'); return; }
-
-                const { totalCost: hourlyCost } = calculateStayCost(new Date(currentTicket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
-                const pensionPaid = currentTicket.cost || 0;
-                const refund = pensionPaid - hourlyCost;
-
-                const message = `<div class="text-left space-y-2"><p class="flex justify-between"><span>Monto Pagado:</span> <span class="font-semibold">$${pensionPaid.toFixed(2)}</span></p><p class="flex justify-between"><span>Cargo por Horas Usadas:</span> <span class="font-semibold">-$${hourlyCost.toFixed(2)}</span></p><hr><p class="flex justify-between text-lg"><strong>Reembolso al Cliente:</strong> <strong class="text-green-600">$${refund.toFixed(2)}</strong></p></div>`;
-
-                showConfirmModal(message, () => {
-                    const updatedTicket = { ...currentTicket, exitTime: new Date(), status: 'paid', cost: hourlyCost, type: 'hourly', originalPensionCost: pensionPaid, userPayment: currentUser.name };
-                    getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
-                        showToast('Pensión cancelada y cobro por horas registrado.', 'success');
-                        currentTicket = updatedTicket;
-                        displayTicketInfo(updatedTicket);
-                        setTimeout(() => { resetUI(); }, 4000);
-                    };
-                });
-            }
-
-            async function handleCancelTicket() {
-                if (!currentTicket || currentTicket.status !== 'active') return;
-
-                showConfirmModal('¿Está seguro de que desea cancelar este ticket? Esta acción no se puede deshacer.', () => {
-                     const updatedTicket = { ...currentTicket, exitTime: new Date(), status: 'cancelled', cost: 0, userCancel: currentUser.name };
-                    getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
-                        showToast('Ticket cancelado con éxito.', 'success');
-                        currentTicket = updatedTicket;
-                        displayTicketInfo(updatedTicket);
-                        setTimeout(() => { resetUI(); }, 4000);
-                    };
-                });
-            }
-            // ======================== FIN: LÓGICA DE TICKETS Y COBRO ========================
-
-            // =====================================================================
-            // ======================= INICIO: LÓGICA DE LA CALCULADORA =======================
-            // =====================================================================
-            
-            const parseTime = (date, timeStr) => {
-                const [hours, minutes] = timeStr.split(':').map(Number);
-                const newDate = new Date(date);
-                newDate.setHours(hours, minutes, 0, 0);
-                return newDate;
-            };
-
-            function calculateHourlyCost(start, end, hourlyRate) {
-                const diffMs = end.getTime() - start.getTime();
-                if (diffMs <= 0) return { billableHours: 0, cost: 0, totalMinutes: 0 };
-
-                const totalMinutes = Math.ceil(diffMs / 60000);
-                let billableHours = 0;
-
-                if (totalMinutes > 0) {
-                    const firstHourMinutes = Math.min(totalMinutes, 60);
-                    if (firstHourMinutes > 3) { billableHours = 1; }
-                    
-                    let remainingMinutes = totalMinutes - firstHourMinutes;
-                    while (remainingMinutes > 0) {
-                        const currentHourMinutes = Math.min(remainingMinutes, 60);
-                        if (currentHourMinutes > 10) { billableHours++; }
-                        remainingMinutes -= currentHourMinutes;
-                    }
-                }
-                
-                return { billableHours, cost: billableHours * hourlyRate, totalMinutes };
-            }
-
-            function calculateStayCost(entry, exit, vehicleType, businessInfo, schedule) {
-                let totalCost = 0;
-                const breakdown = [];
-                let currentTime = new Date(entry);
-
-                const overnightRate = parseFloat(businessInfo.overnightRate) || 0;
-                const firstDaySchedule = schedule[currentTime.getDay()];
-                const firstDayOpeningTime = parseTime(currentTime, firstDaySchedule.apertura);
-                if (currentTime < firstDayOpeningTime) { currentTime = firstDayOpeningTime; }
-
-                while (currentTime < exit) {
-                    const dayOfWeek = currentTime.getDay();
-                    const daySchedule = schedule[dayOfWeek];
-                    const closingTime = parseTime(currentTime, daySchedule.cierre);
-                    const overnightEntryStart = new Date(closingTime.getTime() - 30 * 60000);
-                    const nextDay = new Date(currentTime);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    nextDay.setHours(0,0,0,0);
-                    const nextDaySchedule = schedule[nextDay.getDay()];
-                    const nextDayOpeningTime = parseTime(nextDay, nextDaySchedule.apertura);
-                    const nextDayExitToleranceEnd = new Date(nextDayOpeningTime.getTime() + 30 * 60000);
-
-                    if (exit < nextDayOpeningTime) {
-                        const hoursResult = calculateHourlyCost(currentTime, exit, vehicleType.hourlyRate);
-                        if (hoursResult.cost > 0) {
-                            breakdown.push({ description: `Estacionamiento (${formatDate(currentTime)})`, details: `Tiempo: ${formatElapsedTime(hoursResult.totalMinutes * 60000)} (${hoursResult.billableHours}h facturadas)`, cost: hoursResult.cost });
-                            totalCost += hoursResult.cost;
-                        }
-                        currentTime = exit;
-                    } else {
-                        if (currentTime < overnightEntryStart) {
-                            const hoursResult = calculateHourlyCost(currentTime, overnightEntryStart, vehicleType.hourlyRate);
-                            if (hoursResult.cost > 0) {
-                                breakdown.push({ description: `Estacionamiento (${formatDate(currentTime)})`, details: `Tiempo: ${formatElapsedTime(hoursResult.totalMinutes * 60000)} (${hoursResult.billableHours}h facturadas)`, cost: hoursResult.cost });
-                                totalCost += hoursResult.cost;
-                            }
-                        }
-                        breakdown.push({ description: `Pensión Nocturna (${formatDate(currentTime)})`, details: `1 Noche`, cost: overnightRate });
-                        totalCost += overnightRate;
-                        currentTime = new Date(nextDayExitToleranceEnd);
-                    }
-                }
-                return { totalCost, breakdown };
-            }
-
-            function handleCalculation(e) {
-                e.preventDefault();
-                const entry = new Date(calcEntryTime.value);
-                const exit = new Date(calcExitTime.value);
-
-                if (!calcEntryTime.value || !calcExitTime.value || entry >= exit) { showToast('Ingrese una fecha de salida posterior a la de entrada.', 'error'); return; }
-                const selectedVehicleType = vehicleTypesCache.find(v => v.id === parseInt(calcVehicleType.value));
-                if (!selectedVehicleType) { showToast('Seleccione un tipo de vehículo válido.', 'error'); return; }
-                if (!businessInfoCache.overnightRate) { showToast('Por favor, configure la "Tarifa Nocturna" en los ajustes del negocio.', 'error'); return; }
-
-                const { totalCost, breakdown } = calculateStayCost(entry, exit, selectedVehicleType, businessInfoCache, horarios);
-                
-                calcBreakdown.innerHTML = '';
-                if (breakdown.length > 0) {
-                    breakdown.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'bg-base-100 p-3 rounded-lg border border-theme';
-                        div.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-semibold text-base-content">${item.description}</p><p class="text-xs text-base-content-secondary">${item.details}</p></div><p class="font-bold text-base-content">$${item.cost.toFixed(2)}</p></div>`;
-                        calcBreakdown.appendChild(div);
-                    });
-                } else {
-                    calcBreakdown.innerHTML = '<p class="text-base-content-secondary text-center">Sin cargos por la estancia.</p>';
-                }
-                calcTotalCost.textContent = `$${totalCost.toFixed(2)}`;
-                calculatorResults.classList.remove('hidden');
-            }
-            // ======================== FIN: LÓGICA DE LA CALCULADORA ========================
-            
-            // =====================================================================
-            // ======================= INICIO: LÓGICA DEL MODAL DE CONFIGURACIÓN =======================
-            // =====================================================================
-            
-            function switchTab(tabName) {
-                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-                document.querySelectorAll('.tab-button').forEach(tb => tb.classList.remove('active'));
-                document.getElementById(`tab-content-${tabName}`).classList.add('active');
-                document.querySelector(`.tab-button[data-tab="${tabName}"]`).classList.add('active');
-            }
-            
-            function handleSaveBusinessInfo(e) {
-                e.preventDefault();
-                const businessData = { id: 1, name: businessNameInput.value, address: businessAddressInput.value, phone: businessPhoneInput.value, hours: businessHoursInput.value, overnightRate: parseFloat(businessOvernightRateInput.value) || 0 };
-                getObjectStore(BUSINESS_INFO_STORE_NAME, 'readwrite').put(businessData).onsuccess = () => {
-                    showToast('Información del negocio guardada con éxito.', 'success');
-                    businessInfoCache = businessData;
-                };
-            }
-
-            function displayServicesInSettings(services) {
-                servicesListContainer.innerHTML = '';
-                if (services.length === 0) { servicesListContainer.innerHTML = '<p class="text-base-content-secondary text-sm">No hay servicios registrados.</p>'; return; }
-                services.forEach(service => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between bg-base-200 p-3 rounded-lg border border-theme';
-                    div.innerHTML = `<div class="flex items-center gap-3"><span class="w-8 h-8 rounded-full flex items-center justify-center bg-primary/20 text-primary">${ICONS[service.icon]}</span><div><p class="font-medium text-base-content">${service.name}</p><p class="text-sm text-base-content-secondary">$${service.price.toFixed(2)}</p></div></div><div class="space-x-2"><button class="edit-service-btn text-primary hover:text-primary-focus text-sm font-medium" data-id="${service.id}">Editar</button><button class="delete-service-btn text-red-600 hover:text-red-800 text-sm font-medium" data-id="${service.id}">Eliminar</button></div>`;
-                    servicesListContainer.appendChild(div);
-                });
-            }
-
-            function handleSaveService(e) {
-                e.preventDefault();
-                const id = parseInt(serviceIdInput.value);
-                const serviceData = { name: serviceNameInput.value, price: parseFloat(servicePriceInput.value), icon: serviceIconSelect.value };
-                const store = getObjectStore(SERVICES_STORE_NAME, 'readwrite');
-                const request = id ? store.put({ ...serviceData, id }) : store.add(serviceData);
-                request.onsuccess = () => {
-                    showToast(`Servicio ${id ? 'actualizado' : 'guardado'} con éxito.`, 'success');
-                    resetServiceForm();
-                    loadFabOptions();
-                };
-                request.onerror = () => showToast('Error al guardar el servicio.', 'error');
-            }
-
-            function handleEditService(id) {
-                getObjectStore(SERVICES_STORE_NAME, 'readonly').get(id).onsuccess = (event) => {
-                    const service = event.target.result;
-                    serviceIdInput.value = service.id;
-                    serviceNameInput.value = service.name;
-                    servicePriceInput.value = service.price;
-                    serviceIconSelect.value = service.icon;
-                    serviceFormTitle.textContent = 'Editar Servicio';
-                    saveServiceBtn.textContent = 'Actualizar';
-                    cancelServiceEditBtn.classList.remove('hidden');
-                };
-            }
-
-            function handleDeleteService(id) {
-                showConfirmModal('¿Está seguro de que desea eliminar este servicio?', () => {
-                    getObjectStore(SERVICES_STORE_NAME, 'readwrite').delete(id).onsuccess = () => {
-                        showToast('Servicio eliminado.', 'success');
-                        resetServiceForm();
-                        loadFabOptions();
-                    };
-                });
-            }
-            
-            function resetServiceForm() {
-                serviceForm.reset();
-                serviceIdInput.value = '';
-                serviceFormTitle.textContent = 'Añadir Nuevo Servicio';
-                saveServiceBtn.textContent = 'Guardar Servicio';
-                cancelServiceEditBtn.classList.add('hidden');
-            }
-
-            function displayVehicleTypesInSettings(types) {
-                vehicleTypesListContainer.innerHTML = '';
-                 if (types.length === 0) { vehicleTypesListContainer.innerHTML = '<p class="text-base-content-secondary text-sm">No hay tipos de vehículo registrados.</p>'; return; }
-                types.forEach((type) => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between bg-base-200 p-3 rounded-lg border border-theme';
-                    div.innerHTML = `<div><p class="font-medium text-base-content">${type.name}</p><p class="text-sm text-base-content-secondary">Tarifa: $${type.hourlyRate.toFixed(2)}/hr</p></div><div class="space-x-2"><button class="edit-vehicle-type-btn text-primary hover:text-primary-focus text-sm font-medium" data-id="${type.id}">Editar</button><button class="delete-vehicle-type-btn text-red-600 hover:text-red-800 text-sm font-medium ${types.length === 1 ? 'opacity-50 cursor-not-allowed' : ''}" data-id="${type.id}" ${types.length === 1 ? 'disabled' : ''}>Eliminar</button></div>`;
-                    vehicleTypesListContainer.appendChild(div);
-                });
-            }
-
-            function handleSaveVehicleType(e) {
-                e.preventDefault();
-                const id = parseInt(vehicleTypeIdInput.value);
-                const vehicleTypeData = { name: vehicleTypeNameInput.value, hourlyRate: parseFloat(vehicleTypeRateInput.value) };
-                const store = getObjectStore(VEHICLE_TYPES_STORE_NAME, 'readwrite');
-                const request = id ? store.put({ ...vehicleTypeData, id }) : store.add(vehicleTypeData);
-                request.onsuccess = () => {
-                    showToast(`Tipo de vehículo ${id ? 'actualizado' : 'guardado'} con éxito.`, 'success');
-                    resetVehicleTypeForm();
-                    loadVehicleTypesFromDB();
-                };
-                request.onerror = () => showToast('Error al guardar el tipo de vehículo.', 'error');
-            }
-
-            function handleEditVehicleType(id) {
-                 getObjectStore(VEHICLE_TYPES_STORE_NAME, 'readonly').get(id).onsuccess = (event) => {
-                    const type = event.target.result;
-                    vehicleTypeIdInput.value = type.id;
-                    vehicleTypeNameInput.value = type.name;
-                    vehicleTypeRateInput.value = type.hourlyRate;
-                    vehicleTypeFormTitle.textContent = 'Editar Tipo de Vehículo';
-                    saveVehicleTypeBtn.textContent = 'Actualizar';
-                    cancelVehicleTypeEditBtn.classList.remove('hidden');
-                };
-            }
-
-            function handleDeleteVehicleType(id) {
-                showConfirmModal('¿Está seguro? Eliminar un tipo de vehículo puede afectar tickets existentes.', () => {
-                    getObjectStore(VEHICLE_TYPES_STORE_NAME, 'readwrite').delete(id).onsuccess = () => {
-                        showToast('Tipo de vehículo eliminado.', 'success');
-                        resetVehicleTypeForm();
-                        loadVehicleTypesFromDB();
-                    };
-                });
-            }
-
-            function resetVehicleTypeForm() {
-                vehicleTypeForm.reset();
-                vehicleTypeIdInput.value = '';
-                vehicleTypeFormTitle.textContent = 'Añadir Nuevo Tipo';
-                saveVehicleTypeBtn.textContent = 'Guardar Tipo';
-                cancelVehicleTypeEditBtn.classList.add('hidden');
-            }
-
-            async function hashPassword(password) {
-                const encoder = new TextEncoder();
-                const data = encoder.encode(password);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-            }
-
-            function displayUsersInSettings(users) {
-                usersListContainer.innerHTML = '';
-                if (users.length === 0) { usersListContainer.innerHTML = '<p class="text-base-content-secondary text-sm">No hay usuarios registrados.</p>'; return; }
-                const adminCount = users.filter(u => u.role === 'Administrador').length;
-                users.forEach(user => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between bg-base-200 p-3 rounded-lg border border-theme';
-                    const isLastAdmin = user.role === 'Administrador' && adminCount === 1;
-                    div.innerHTML = `<div><p class="font-medium text-base-content">${user.name}</p><p class="text-sm text-base-content-secondary">${user.role}</p></div><div class="space-x-2"><button class="edit-user-btn text-primary hover:text-primary-focus text-sm font-medium" data-id="${user.id}">Editar</button><button class="delete-user-btn text-red-600 hover:text-red-800 text-sm font-medium ${isLastAdmin ? 'opacity-50 cursor-not-allowed' : ''}" data-id="${user.id}" ${isLastAdmin ? 'disabled' : ''}>Eliminar</button></div>`;
-                    usersListContainer.appendChild(div);
-                });
-            }
-
-            async function handleSaveUser(e) {
-                e.preventDefault();
-                const id = parseInt(userIdInput.value);
-                const name = userNameInput.value;
-                const role = userRoleSelect.value;
-                const password = userPasswordInput.value;
-
-                if (!id && !password) { showToast('La contraseña es obligatoria para nuevos usuarios.', 'error'); return; }
-
-                if (id) {
-                    let newHashedPassword = null;
-                    if (password) { newHashedPassword = await hashPassword(password); }
-                    const transaction = db.transaction(USERS_STORE_NAME, 'readwrite');
-                    const store = transaction.objectStore(USERS_STORE_NAME);
-                    const getRequest = store.get(id);
-                    getRequest.onsuccess = () => {
-                        const userData = getRequest.result;
-                        if (!userData) { showToast('Error: no se pudo encontrar el usuario para actualizar.', 'error'); return; }
-                        userData.name = name;
-                        userData.role = role;
-                        if (newHashedPassword) { userData.password = newHashedPassword; }
-                        store.put(userData);
-                    };
-                    transaction.oncomplete = () => { showToast('Usuario actualizado con éxito.', 'success'); resetUserForm(); loadUsersFromDB(); };
-                    transaction.onerror = () => showToast('Error al actualizar el usuario.', 'error');
-                } else {
-                    const hashedPassword = await hashPassword(password);
-                    const userData = { name, role, password: hashedPassword };
-                    const transaction = db.transaction(USERS_STORE_NAME, 'readwrite');
-                    const store = transaction.objectStore(USERS_STORE_NAME);
-                    store.add(userData);
-                    transaction.oncomplete = () => { showToast('Usuario añadido con éxito.', 'success'); resetUserForm(); loadUsersFromDB(); };
-                    transaction.onerror = () => showToast('Error al añadir el usuario.', 'error');
-                }
-            }
-
-            function handleEditUser(id) {
-                getObjectStore(USERS_STORE_NAME, 'readonly').get(id).onsuccess = (event) => {
-                    const user = event.target.result;
-                    userIdInput.value = user.id;
-                    userNameInput.value = user.name;
-                    userRoleSelect.value = user.role;
-                    userPasswordInput.value = '';
-                    userPasswordInput.placeholder = 'Dejar en blanco para no cambiar';
-                    userFormTitle.textContent = 'Editar Usuario';
-                    saveUserBtn.textContent = 'Actualizar';
-                    cancelUserEditBtn.classList.remove('hidden');
-                };
-            }
-
-            function handleDeleteUser(id) {
-                showConfirmModal('¿Está seguro de que desea eliminar este usuario?', () => {
-                    getObjectStore(USERS_STORE_NAME, 'readwrite').delete(id).onsuccess = () => {
-                        showToast('Usuario eliminado.', 'success');
-                        resetUserForm();
-                        loadUsersFromDB();
-                    };
-                });
-            }
-
-            function resetUserForm() {
-                userForm.reset();
-                userIdInput.value = '';
-                userPasswordInput.placeholder = 'Contraseña';
-                userFormTitle.textContent = 'Añadir Nuevo Usuario';
-                saveUserBtn.textContent = 'Guardar Usuario';
-                cancelUserEditBtn.classList.add('hidden');
-            }
-            // ======================== FIN: LÓGICA DEL MODAL DE CONFIGURACIÓN ========================
-            
-            // =====================================================================
-            // ======================= INICIO: EVENT LISTENERS =======================
-            // =====================================================================
-            loginForm.addEventListener('submit', handleLogin);
-            logoutBtn.addEventListener('click', handleLogout);
-            
-            themeToggleBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isHidden = themePopover.classList.contains('opacity-0');
-                toggleThemePopover(isHidden);
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!themePopover.contains(e.target) && !themeToggleBtn.contains(e.target)) {
-                    toggleThemePopover(false);
-                }
-            });
-
-            quickChargeToggle.addEventListener('change', (e) => {
-                localStorage.setItem('quickChargeMode', e.target.checked);
-            });
-
-
-            barcodeInput.addEventListener('input', (e) => {
-                clearTimeout(searchDebounceTimer);
-                const barcode = e.target.value.trim().toUpperCase();
-                if (!barcode) { ticketInfoSection.classList.add('hidden'); return; }
-                searchDebounceTimer = setTimeout(() => { findTicket(barcode); }, 500);
-            });
-
-            newEntryBtn.addEventListener('click', () => { resetNewEntryForm(); toggleModal(newEntryModal, true); });
-            cancelEntryBtn.addEventListener('click', () => toggleModal(newEntryModal, false));
-            newEntryForm.addEventListener('submit', registerEntry);
-            chargeButton.addEventListener('click', markTicketAsPaid);
-            cancelPensionBtn.addEventListener('click', handleCancelPension);
-            convertToOvernightBtn.addEventListener('click', handleConvertToOvernight);
-            cancelTicketBtn.addEventListener('click', handleCancelTicket);
-            fabMainBtn.addEventListener('click', () => fabContainer.classList.toggle('active'));
-            typeHourlyBtn.addEventListener('click', () => setEntryType('hourly'));
-            typeOvernightBtn.addEventListener('click', () => setEntryType('overnight'));
-            typePensionBtn.addEventListener('click', () => setEntryType('pension'));
-            vehicleTypeSelect.addEventListener('change', updateBrandSelect);
-            newPlateInput.addEventListener('blur', findPreviousEntryByPlate);
-            
-            cancelCalcBtn.addEventListener('click', () => toggleModal(calculatorModal, false));
-            calculatorForm.addEventListener('submit', handleCalculation);
-            
-            closeSettingsBtn.addEventListener('click', () => toggleModal(settingsModal, false));
-
-            settingsTabs.addEventListener('click', (e) => { if (e.target.matches('.tab-button')) switchTab(e.target.dataset.tab); });
-            
-            businessInfoForm.addEventListener('submit', handleSaveBusinessInfo);
-
-            serviceForm.addEventListener('submit', handleSaveService);
-            cancelServiceEditBtn.addEventListener('click', resetServiceForm);
-            servicesListContainer.addEventListener('click', (e) => {
-                if (e.target.matches('.edit-service-btn')) handleEditService(parseInt(e.target.dataset.id));
-                if (e.target.matches('.delete-service-btn')) handleDeleteService(parseInt(e.target.dataset.id));
-            });
-
-            vehicleTypeForm.addEventListener('submit', handleSaveVehicleType);
-            cancelVehicleTypeEditBtn.addEventListener('click', resetVehicleTypeForm);
-            vehicleTypesListContainer.addEventListener('click', (e) => {
-                if (e.target.matches('.edit-vehicle-type-btn')) handleEditVehicleType(parseInt(e.target.dataset.id));
-                if (e.target.matches('.delete-vehicle-type-btn')) handleDeleteVehicleType(parseInt(e.target.dataset.id));
-            });
-            
-            userForm.addEventListener('submit', handleSaveUser);
-            cancelUserEditBtn.addEventListener('click', resetUserForm);
-            usersListContainer.addEventListener('click', (e) => {
-                if (e.target.matches('.edit-user-btn')) handleEditUser(parseInt(e.target.dataset.id));
-                if (e.target.matches('.delete-user-btn')) handleDeleteUser(parseInt(e.target.dataset.id));
-            });
-
-            closeExpensesBtn.addEventListener('click', () => toggleModal(expensesModal, false));
-            expenseForm.addEventListener('submit', handleSaveExpense);
-            cancelExpenseEditBtn.addEventListener('click', resetExpenseForm);
-            expensesListContainer.addEventListener('click', (e) => {
-                if (e.target.matches('.edit-expense-btn')) handleEditExpense(parseInt(e.target.dataset.id));
-                if (e.target.matches('.delete-expense-btn')) handleDeleteExpense(parseInt(e.target.dataset.id));
-            });
-            
-            confirmModalCancelBtn.addEventListener('click', () => toggleModal(confirmModal, false));
-            confirmModalConfirmBtn.addEventListener('click', () => {
-                if(typeof confirmCallback === 'function') confirmCallback();
-                toggleModal(confirmModal, false);
-            });
-            // ======================== FIN: EVENT LISTENERS ========================
-            
-            // Inicialización
-            initDB();
-            populateColorSuggestions();
-
-            // Inicializar Flatpickr
-            flatpickr(calcEntryTime, { enableTime: true, dateFormat: "Y-m-d H:i", time_24hr: true, defaultDate: new Date(), locale: "es" });
-            flatpickr(calcExitTime, { enableTime: true, dateFormat: "Y-m-d H:i", time_24hr: true, defaultDate: new Date(), locale: "es" });
-        });
-    </script>
 </body>
+
 </html>
