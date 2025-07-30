@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const USERS_STORE_NAME = 'users';
     const EXPENSES_STORE_NAME = 'expenses';
     const MONTH_NAMES = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+    const PRINTER_SETTINGS_STORE_NAME = 'printerSettings';
 
     const BRANDS = { Carro: ["Nissan", "Chevrolet", "Volkswagen", "Toyota", "Honda", "Ford", "Kia", "Mazda", "Otro"], Moto: ["Italika", "Honda", "Yamaha", "Suzuki", "Bajaj", "Vento", "Otro"] };
     const COLORS = ["Blanco", "Negro", "Gris", "Plata", "Rojo", "Azul", "Verde"];
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     const sessionUsername = document.getElementById('session-username');
     const sessionRole = document.getElementById('session-role');
-    const barcodeInput = document.getElementById('barcode-input'), ticketInfoSection = document.getElementById('ticket-info'), ticketStatusBanner = document.getElementById('ticket-status-banner'), hourlyDetails = document.getElementById('hourly-details'), pensionDetails = document.getElementById('pension-details'), vehiclePlateHourly = document.getElementById('vehicle-plate-hourly'), vehicleTypeHourly = document.getElementById('vehicle-type-hourly'), vehicleBrandHourly = document.getElementById('vehicle-brand-hourly'), vehicleColorHourly = document.getElementById('vehicle-color-hourly'), entryTimeHourly = document.getElementById('entry-time-hourly'), timeElapsedHourly = document.getElementById('time-elapsed-hourly'), exitTimeHourly = document.getElementById('exit-time-hourly'), totalCostHourly = document.getElementById('total-cost-hourly'), chargeButton = document.getElementById('charge-button'), vehiclePlatePension = document.getElementById('vehicle-plate-pension'), pensionTypeDetails = document.getElementById('pension-type-details'), endDatePension = document.getElementById('end-date-pension'), vehicleTypePension = document.getElementById('vehicle-type-pension'), vehicleBrandPension = document.getElementById('vehicle-brand-pension'), vehicleColorPension = document.getElementById('vehicle-color-pension'), newEntryBtn = document.getElementById('new-entry-btn'), newEntryModal = document.getElementById('new-entry-modal'), newEntryForm = document.getElementById('new-entry-form'), cancelEntryBtn = document.getElementById('cancel-entry-btn'), newPlateInput = document.getElementById('new-plate-input'), typeHourlyBtn = document.getElementById('type-hourly-btn'), typePensionBtn = document.getElementById('type-pension-btn'), typeOvernightBtn = document.getElementById('type-overnight-btn'), pensionFields = document.getElementById('pension-fields'), newPensionTypeInput = document.getElementById('new-pension-type-input'), newPensionEndDate = document.getElementById('new-pension-end-date'), newPensionAmount = document.getElementById('new-pension-amount'), vehicleTypeSelect = document.getElementById('vehicle-type-select'), newBrandSelect = document.getElementById('new-brand-select'), newColorInput = document.getElementById('new-color-input'), colorSuggestions = document.getElementById('color-suggestions'), plateLookupMsg = document.getElementById('plate-lookup-msg'), fabContainer = document.getElementById('fab-container'), fabMainBtn = document.getElementById('fab-main'), fabOptionsContainer = document.getElementById('fab-options');
+    const barcodeInput = document.getElementById('barcode-input'), ticketInfoSection = document.getElementById('ticket-info'), ticketStatusBanner = document.getElementById('ticket-status-banner'), hourlyDetails = document.getElementById('hourly-details'), pensionDetails = document.getElementById('pension-details'), vehiclePlateHourly = document.getElementById('vehicle-plate-hourly'), vehicleTypeHourly = document.getElementById('vehicle-type-hourly'), vehicleBrandHourly = document.getElementById('vehicle-brand-hourly'), vehicleColorHourly = document.getElementById('vehicle-color-hourly'), entryTimeHourly = document.getElementById('entry-time-hourly'), timeElapsedHourly = document.getElementById('time-elapsed-hourly'), exitTimeHourly = document.getElementById('exit-time-hourly'), totalCostHourly = document.getElementById('total-cost-hourly'), chargeButton = document.getElementById('charge-button'), vehiclePlatePension = document.getElementById('vehicle-plate-pension'), pensionTypeDetails = document.getElementById('pension-type-details'), endDatePension = document.getElementById('end-date-pension'), vehicleTypePension = document.getElementById('vehicle-type-pension'), vehicleBrandPension = document.getElementById('vehicle-brand-pension'), vehicleColorPension = document.getElementById('vehicle-color-pension'), newEntryBtn = document.getElementById('new-entry-btn'), newEntryModal = document.getElementById('new-entry-modal'), newEntryForm = document.getElementById('new-entry-form'), cancelEntryBtn = document.getElementById('cancel-entry-btn'), newPlateInput = document.getElementById('new-plate-input'), typeHourlyBtn = document.getElementById('type-hourly-btn'), typePensionBtn = document.getElementById('type-pension-btn'), typeOvernightBtn = document.getElementById('type-overnight-btn'), pensionFieldsWrapper = document.getElementById('pension-fields-wrapper'), newPensionTypeInput = document.getElementById('new-pension-type-input'), newPensionEndDate = document.getElementById('new-pension-end-date'), newPensionAmount = document.getElementById('new-pension-amount'), vehicleTypeSelect = document.getElementById('vehicle-type-select'), newBrandSelect = document.getElementById('new-brand-select'), newColorInput = document.getElementById('new-color-input'), colorSuggestions = document.getElementById('color-suggestions'), plateLookupMsg = document.getElementById('plate-lookup-msg'), fabContainer = document.getElementById('fab-container'), fabMainBtn = document.getElementById('fab-main'), fabOptionsContainer = document.getElementById('fab-options');
     const calculatorModal = document.getElementById('calculator-modal'), calculatorForm = document.getElementById('calculator-form'), calcVehicleType = document.getElementById('calc-vehicle-type'), calcEntryTime = document.getElementById('calc-entry-time'), calcExitTime = document.getElementById('calc-exit-time'), calculatorResults = document.getElementById('calculator-results'), calcBreakdown = document.getElementById('calc-breakdown'), calcTotalCost = document.getElementById('calc-total-cost'), cancelCalcBtn = document.getElementById('cancel-calc-btn');
     const settingsModal = document.getElementById('settings-modal'), closeSettingsBtn = document.getElementById('close-settings-btn'), settingsTabs = document.getElementById('settings-tabs');
     const confirmModal = document.getElementById('confirm-modal'), confirmModalMessage = document.getElementById('confirm-modal-message'), confirmModalCancelBtn = document.getElementById('confirm-modal-cancel-btn'), confirmModalConfirmBtn = document.getElementById('confirm-modal-confirm-btn');
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelPensionBtn = document.getElementById('cancel-pension-btn');
     const pensionTypeContainer = document.getElementById('pension-type-container');
     const pensionEndDateContainer = document.getElementById('pension-end-date-container');
+    const pensionAmountContainer = document.getElementById('pension-amount-container');
     const convertToOvernightBtn = document.getElementById('convert-to-overnight-btn');
     const cancelTicketBtn = document.getElementById('cancel-ticket-btn');
     const expensesModal = document.getElementById('expenses-modal'), closeExpensesBtn = document.getElementById('close-expenses-btn'), expenseForm = document.getElementById('expense-form'), expenseIdInput = document.getElementById('expense-id-input'), expenseDescriptionInput = document.getElementById('expense-description-input'), expenseAmountInput = document.getElementById('expense-amount-input'), cancelExpenseEditBtn = document.getElementById('cancel-expense-edit-btn'), saveExpenseBtn = document.getElementById('save-expense-btn'), expensesListContainer = document.getElementById('expenses-list-container'), expensesTotal = document.getElementById('expenses-total');
@@ -61,12 +63,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const pensionRevenueCard = document.getElementById('pension-revenue-card');
     const servicesRevenueCard = document.getElementById('services-revenue-card');
     const expensesCard = document.getElementById('expenses-card');
+    const servicesRevenueContainer = document.getElementById('services-revenue-container');
     // Shift Report Modal
     const shiftReportModal = document.getElementById('shift-report-modal');
     const shiftReportContent = document.getElementById('shift-report-content');
     const shiftReportUserInfo = document.getElementById('shift-report-user-info');
     const printShiftReportBtn = document.getElementById('print-shift-report-btn');
     const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+    // Services Revenue Modal
+    const servicesRevenueModal = document.getElementById('services-revenue-modal');
+    const closeServicesRevenueBtn = document.getElementById('close-services-revenue-btn');
+    const servicesRevenueBreakdownList = document.getElementById('services-revenue-breakdown-list');
+    const servicesRevenueTotalModal = document.getElementById('services-revenue-total-modal');
+    // Printing Settings
+    const connectQzBtn = document.getElementById('connect-qz-btn');
+    const qzStatusIndicator = document.getElementById('qz-status-indicator');
+    const qzStatusText = document.getElementById('qz-status-text');
+    const printerSelect = document.getElementById('printer-select');
+    const savePrinterBtn = document.getElementById('save-printer-btn');
 
 
     let db;
@@ -78,7 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let usersCache = [];
     let confirmCallback = null;
     let searchDebounceTimer;
-    let shiftReportData = null; // To store data for printing
+    let shiftReportData = null;
+    let selectedPrinter = null;
+
+    // To store data for printing
     // ======================== FIN: CONSTANTES Y VARIABLES ========================
 
     // =====================================================================
@@ -113,6 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const expenseStore = db.createObjectStore(EXPENSES_STORE_NAME, { keyPath: 'id', autoIncrement: true });
                 expenseStore.createIndex('date_idx', 'date', { unique: false });
                 expenseStore.createIndex('user_idx', 'user', { unique: false });
+            }
+            if (!db.objectStoreNames.contains(PRINTER_SETTINGS_STORE_NAME)) {
+                db.createObjectStore(PRINTER_SETTINGS_STORE_NAME, { keyPath: 'id' });
             }
         };
         request.onsuccess = (event) => {
@@ -289,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================= INICIO: CARGA DE DATOS Y DASHBOARD =======================
     // =====================================================================
     function loadInitialData() {
+        loadPrinterSetting();
         loadFabOptions();
         loadVehicleTypesFromDB();
         loadBusinessInfo();
@@ -374,6 +395,69 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Error updating dashboard cards:", error);
             showToast("Error al actualizar el panel de indicadores.", "error");
+        }
+    }
+
+    async function displayServiceRevenueBreakdown() {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        const salesPromise = new Promise((resolve, reject) => {
+            const index = getObjectStore(SALES_STORE_NAME, 'readonly').index('timestamp_idx');
+            const range = IDBKeyRange.bound(todayStart, todayEnd);
+            index.getAll(range).onsuccess = e => resolve(e.target.result || []);
+            index.onerror = e => reject(e.target.error);
+        });
+
+        const servicesPromise = new Promise((resolve, reject) => {
+            const store = getObjectStore(SERVICES_STORE_NAME, 'readonly');
+            store.getAll().onsuccess = e => resolve(e.target.result || []);
+            store.onerror = e => reject(e.target.error);
+        });
+
+        try {
+            const [sales, services] = await Promise.all([salesPromise, servicesPromise]);
+
+            const revenueByService = {};
+            services.forEach(s => {
+                revenueByService[s.name] = { total: 0, icon: s.icon };
+            });
+
+            let totalRevenue = 0;
+            sales.forEach(sale => {
+                if (revenueByService[sale.serviceName]) {
+                    revenueByService[sale.serviceName].total += sale.price;
+                }
+                totalRevenue += sale.price;
+            });
+
+            servicesRevenueBreakdownList.innerHTML = '';
+            if (Object.keys(revenueByService).length === 0) {
+                servicesRevenueBreakdownList.innerHTML = '<p class="text-base-content-secondary text-sm text-center">No hay servicios configurados.</p>';
+            } else {
+                for (const serviceName in revenueByService) {
+                    const serviceData = revenueByService[serviceName];
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between bg-base-100 p-3 rounded-lg border border-theme';
+                    div.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <span class="w-10 h-10 rounded-full flex items-center justify-center bg-primary/20 text-primary">${ICONS[serviceData.icon] || ''}</span>
+                            <p class="font-medium text-base-content">${serviceName}</p>
+                        </div>
+                        <p class="font-bold text-lg text-base-content">${formatCurrency(serviceData.total)}</p>
+                    `;
+                    servicesRevenueBreakdownList.appendChild(div);
+                }
+            }
+
+            servicesRevenueTotalModal.textContent = formatCurrency(totalRevenue);
+            toggleModal(servicesRevenueModal, true);
+
+        } catch (error) {
+            console.error("Error displaying service revenue breakdown:", error);
+            showToast("Error al mostrar el desglose de servicios.", "error");
         }
     }
 
@@ -670,17 +754,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const isPaidStay = type === 'pension' || type === 'overnight';
-        pensionFields.classList.toggle('show', isPaidStay);
+        const isLongTermPension = type === 'pension';
+
+        pensionFieldsWrapper.classList.toggle('show', isPaidStay);
+
         newPensionAmount.required = isPaidStay;
         newPensionAmount.readOnly = type === 'overnight';
         newPensionAmount.value = type === 'overnight' ? (businessInfoCache.overnightRate || '') : '';
 
-
-        const isLongTermPension = type === 'pension';
-        pensionTypeContainer.style.display = isLongTermPension ? 'block' : 'none';
-        pensionEndDateContainer.style.display = isLongTermPension ? 'block' : 'none';
+        pensionTypeContainer.classList.toggle('hidden', !isLongTermPension);
         newPensionTypeInput.required = isLongTermPension;
+
+        pensionEndDateContainer.classList.toggle('hidden', !isLongTermPension);
         newPensionEndDate.required = isLongTermPension;
+
+        pensionAmountContainer.classList.toggle('md:col-span-2', !isLongTermPension);
     }
 
     function updateBrandSelect() {
@@ -1101,84 +1189,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function printShiftReportWithQZ() {
+        // 1. Verifica si hay datos para imprimir
         if (!shiftReportData) {
             showToast("No hay datos de reporte para imprimir.", "error");
             return;
         }
 
-        // Conectar a QZ Tray
+        // 2. Verifica si una impresora ha sido seleccionada y guardada
+        if (!selectedPrinter) {
+            showToast("Impresora no configurada. Vaya a Configuración > Impresión.", "error");
+            // Opcional: abrir el modal de configuración directamente
+            // toggleModal(settingsModal, true);
+            // switchTab('printing');
+            return;
+        }
+
+        // 3. Verifica si QZ Tray está activo
         if (!qz.websocket.isActive()) {
-            qz.websocket.connect().then(() => {
-                showToast("Conectado a QZ Tray.", "info");
-                findAndPrint();
-            }).catch(err => {
-                console.error(err);
-                showToast("Error al conectar con QZ Tray. Asegúrate que está corriendo.", "error");
-            });
-        } else {
-            findAndPrint();
+            showToast("QZ Tray no está conectado. Intentando reconectar...", "error");
+            connectQZ(); // Intenta reconectar automáticamente
+            return;
         }
 
-        function findAndPrint() {
-            // Busca la impresora. Puedes cambiar 'EPSON' por el nombre de tu impresora, o dejarlo null para usar la predeterminada.
-            qz.printers.find().then(printer => {
-                const config = qz.configs.create(printer);
+        // 4. Crea la configuración de impresión con la impresora guardada
+        const config = qz.configs.create(selectedPrinter);
 
-                // Comandos ESC/POS para el recibo
-                const data = [
-                    '\x1B' + '\x40', // Inicializar impresora
-                    '\x1B' + '\x61' + '\x01', // Centrar
-                    '\x1B' + '\x21' + '\x20', // Doble altura
-                    businessInfoCache.name || 'Estacionamiento',
-                    '\x0A',
-                    '\x1B' + '\x21' + '\x00', // Texto normal
-                    businessInfoCache.address || '',
-                    '\x0A',
-                    businessInfoCache.phone || '',
-                    '\x0A',
-                    '\x1B' + '\x61' + '\x00', // Alinear a la izquierda
-                    '--------------------------------\x0A',
-                    `Corte para: ${currentUser.name}\x0A`,
-                    `Fecha: ${new Date().toLocaleString('es-MX')}\x0A`,
-                    '--------------------------------\x0A',
-                    '\x1B' + '\x21' + '\x08', // Negrita
-                    'INGRESOS\x0A',
-                    '\x1B' + '\x21' + '\x00', // Normal
-                    `Estacionamiento: ${formatCurrency(shiftReportData.parking.total)}\x0A`,
-                    `Pensiones:       ${formatCurrency(shiftReportData.pensions.total)}\x0A`,
-                    `Servicios:       ${formatCurrency(shiftReportData.services.total)}\x0A`,
-                    '--------------------------------\x0A',
-                    '\x1B' + '\x21' + '\x08', // Negrita
-                    `TOTAL INGRESOS:  ${formatCurrency(shiftReportData.totalRevenue)}\x0A`,
-                    '\x1B' + '\x21' + '\x00', // Normal
-                    '\x0A',
-                    '\x1B' + '\x21' + '\x08', // Negrita
-                    'GASTOS\x0A',
-                    '\x1B' + '\x21' + '\x00', // Normal
-                    `Total Gastos:    ${formatCurrency(shiftReportData.expenses.total)}\x0A`,
-                    '--------------------------------\x0A',
-                    '\x0A',
-                    '\x1B' + '\x21' + '\x10', // Doble ancho
-                    `TOTAL EN CAJA:   ${formatCurrency(shiftReportData.netTotal)}\x0A`,
-                    '\x0A',
-                    '\x0A',
-                    '\x0A',
-                    '\x0A',
-                    '\x1D' + '\x56' + '\x42' + '\x00' // Cortar papel
-                ];
+        // 5. Define los datos del recibo (comandos ESC/POS)
+        const data = [
+            '\x1B' + '\x40', // Inicializar impresora
+            '\x1B' + '\x61' + '\x01', // Centrar
+            '\x1B' + '\x21' + '\x20', // Doble altura
+            businessInfoCache.name || 'Estacionamiento',
+            '\x0A',
+            '\x1B' + '\x21' + '\x00', // Texto normal
+            businessInfoCache.address || '',
+            '\x0A',
+            businessInfoCache.phone || '',
+            '\x0A',
+            '\x1B' + '\x61' + '\x00', // Alinear a la izquierda
+            '--------------------------------\x0A',
+            `Corte para: ${currentUser.name}\x0A`,
+            `Fecha: ${new Date().toLocaleString('es-MX')}\x0A`,
+            '--------------------------------\x0A',
+            '\x1B' + '\x21' + '\x08', // Negrita
+            'INGRESOS\x0A',
+            '\x1B' + '\x21' + '\x00', // Normal
+            `Estacionamiento: ${formatCurrency(shiftReportData.parking.total)}\x0A`,
+            `Pensiones:       ${formatCurrency(shiftReportData.pensions.total)}\x0A`,
+            `Servicios:       ${formatCurrency(shiftReportData.services.total)}\x0A`,
+            '--------------------------------\x0A',
+            '\x1B' + '\x21' + '\x08', // Negrita
+            `TOTAL INGRESOS:  ${formatCurrency(shiftReportData.totalRevenue)}\x0A`,
+            '\x1B' + '\x21' + '\x00', // Normal
+            '\x0A',
+            '\x1B' + '\x21' + '\x08', // Negrita
+            'GASTOS\x0A',
+            '\x1B' + '\x21' + '\x00', // Normal
+            `Total Gastos:    ${formatCurrency(shiftReportData.expenses.total)}\x0A`,
+            '--------------------------------\x0A',
+            '\x0A',
+            '\x1B' + '\x21' + '\x10', // Doble ancho
+            `TOTAL EN CAJA:   ${formatCurrency(shiftReportData.netTotal)}\x0A`,
+            '\x0A',
+            '\x0A',
+            '\x0A',
+            '\x0A',
+            '\x1D' + '\x56' + '\x42' + '\x00' // Cortar papel
+        ];
 
-                qz.print(config, data).then(() => {
-                    showToast("Reporte enviado a la impresora.", "success");
-                }).catch(err => {
-                    console.error(err);
-                    showToast("Error al imprimir.", "error");
-                });
-            }).catch(err => {
-                console.error(err);
-                showToast("No se encontró la impresora.", "error");
-            });
-        }
+        // 6. Envía los datos a la impresora
+        qz.print(config, data).then(() => {
+            showToast("Reporte enviado a la impresora.", "success");
+        }).catch(err => {
+            console.error(err);
+            showToast("Error al imprimir. Verifique la impresora y QZ Tray.", "error");
+        });
     }
+
 
 
     // ======================== FIN: LÓGICA DE CORTE DE CAJA E IMPRESIÓN ========================
@@ -1512,6 +1599,88 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================== FIN: LÓGICA DEL MODAL DE CONFIGURACIÓN ========================
 
     // =====================================================================
+    // ======================= INICIO: LÓGICA DE IMPRESIÓN (QZ TRAY) =======================
+    // =====================================================================
+
+    function updateQZStatus(connected) {
+        if (connected) {
+            qzStatusIndicator.classList.remove('bg-red-500', 'animate-pulse');
+            qzStatusIndicator.classList.add('bg-green-500');
+            qzStatusText.textContent = 'Conectado';
+            connectQzBtn.disabled = true;
+            connectQzBtn.classList.add('opacity-50');
+            findPrinters();
+        } else {
+            qzStatusIndicator.classList.add('bg-red-500', 'animate-pulse');
+            qzStatusIndicator.classList.remove('bg-green-500');
+            qzStatusText.textContent = 'Desconectado';
+            connectQzBtn.disabled = false;
+            connectQzBtn.classList.remove('opacity-50');
+            printerSelect.innerHTML = '<option>Conecte a QZ Tray para buscar impresoras</option>';
+            printerSelect.disabled = true;
+            savePrinterBtn.disabled = true;
+            savePrinterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    }
+
+    function connectQZ() {
+        if (qz.websocket.isActive()) return;
+        qz.websocket.connect().then(() => {
+            showToast("Conectado a QZ Tray.", "success");
+            updateQZStatus(true);
+        }).catch(err => {
+            console.error(err);
+            showToast("No se pudo conectar a QZ Tray. Asegúrate que la aplicación está corriendo.", "error");
+            updateQZStatus(false);
+        });
+    }
+
+    function findPrinters() {
+        qz.printers.find().then(printers => {
+            printerSelect.innerHTML = '';
+            printers.forEach(printer => {
+                const option = document.createElement('option');
+                option.value = printer;
+                option.textContent = printer;
+                if (printer === selectedPrinter) {
+                    option.selected = true;
+                }
+                printerSelect.appendChild(option);
+            });
+            printerSelect.disabled = false;
+            savePrinterBtn.disabled = false;
+            savePrinterBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }).catch(err => {
+            console.error(err);
+            showToast("Error al buscar impresoras.", "error");
+        });
+    }
+
+    function savePrinterSelection() {
+        const printerName = printerSelect.value;
+        if (!printerName) {
+            showToast("Seleccione una impresora válida.", "error");
+            return;
+        }
+        const setting = { id: 1, printerName: printerName };
+        getObjectStore(PRINTER_SETTINGS_STORE_NAME, 'readwrite').put(setting).onsuccess = () => {
+            selectedPrinter = printerName;
+            showToast(`Impresora "${printerName}" guardada.`, "success");
+        };
+    }
+
+    function loadPrinterSetting() {
+        getObjectStore(PRINTER_SETTINGS_STORE_NAME, 'readonly').get(1).onsuccess = (event) => {
+            const setting = event.target.result;
+            if (setting && setting.printerName) {
+                selectedPrinter = setting.printerName;
+                // Intenta conectar automáticamente al iniciar
+                connectQZ();
+            }
+        };
+    }
+
+    // =====================================================================
     // ======================= INICIO: EVENT LISTENERS =======================
     // =====================================================================
     loginForm.addEventListener('submit', handleLogin);
@@ -1601,6 +1770,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof confirmCallback === 'function') confirmCallback();
         toggleModal(confirmModal, false);
     });
+
+    servicesRevenueContainer.addEventListener('click', displayServiceRevenueBreakdown);
+    closeServicesRevenueBtn.addEventListener('click', () => toggleModal(servicesRevenueModal, false));
+    connectQzBtn.addEventListener('click', connectQZ);
+    savePrinterBtn.addEventListener('click', savePrinterSelection);
     // ======================== FIN: EVENT LISTENERS ========================
 
     // Inicialización
