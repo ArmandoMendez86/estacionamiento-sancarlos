@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================= INICIO: CONSTANTES Y VARIABLES =======================
     // =====================================================================
     const DB_NAME = 'parkingLotDB';
-    const DB_VERSION = 14;
+    const DB_VERSION = 16; // VERSIÓN INCREMENTADA PARA NUEVO ÍNDICE
     const TICKET_STORE_NAME = 'tickets';
     const COUNTER_STORE_NAME = 'counters';
     const SERVICES_STORE_NAME = 'services';
@@ -81,7 +81,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const qzStatusText = document.getElementById('qz-status-text');
     const printerSelect = document.getElementById('printer-select');
     const savePrinterBtn = document.getElementById('save-printer-btn');
-
+    const paperWidthSlider = document.getElementById('paper-width-slider');
+    const paperWidthValue = document.getElementById('paper-width-value');
+    const testPrintBtn = document.getElementById('test-print-btn');
+    // Lost Ticket Modal
+    const lostTicketBtn = document.getElementById('lost-ticket-btn');
+    const lostTicketModal = document.getElementById('lost-ticket-modal');
+    const closeLostTicketModalBtn = document.getElementById('close-lost-ticket-modal');
+    const lostTicketForm = document.getElementById('lost-ticket-form');
+    const lostTicketPlateInput = document.getElementById('lost-ticket-plate-input');
+    const lostTicketResults = document.getElementById('lost-ticket-results');
+    const lostTicketInfo = document.getElementById('lost-ticket-info');
+    const lostTicketBreakdown = document.getElementById('lost-ticket-breakdown');
+    const lostTicketTotalCost = document.getElementById('lost-ticket-total-cost');
+    const chargeLostTicketBtn = document.getElementById('charge-lost-ticket-btn');
+    // ===== INICIO: NUEVOS ELEMENTOS DOM PARA REPORTES =====
+    const reportsModal = document.getElementById('reports-modal');
+    const closeReportsModalBtn = document.getElementById('close-reports-modal');
+    const reportsTableBody = document.getElementById('reports-table-body');
+    const reportDateFilter = document.getElementById('report-date-filter');
+    const reportSearchFilter = document.getElementById('report-search-filter');
+    const reportStatusFilterButtons = document.getElementById('report-status-filter-buttons');
+    const reportsPaginationControls = document.getElementById('reports-pagination-controls');
+    const reportPrevPageBtn = document.getElementById('report-prev-page-btn');
+    const reportNextPageBtn = document.getElementById('report-next-page-btn');
+    const reportPageInfo = document.getElementById('report-page-info');
+    const reportRecordsInfo = document.getElementById('report-records-info');
+    const reportParkingRevenue = document.getElementById('report-parking-revenue');
+    const reportServicesRevenue = document.getElementById('report-services-revenue');
+    const reportExpensesTotal = document.getElementById('report-expenses-total');
+    const reportNetTotal = document.getElementById('report-net-total');
+    const reportUserBreakdown = document.getElementById('report-user-breakdown');
+    // ===== FIN: NUEVOS ELEMENTOS DOM =====
 
     let db;
     let currentUser = null;
@@ -94,9 +125,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchDebounceTimer;
     let shiftReportData = null;
     let selectedPrinter = null;
-
-    // To store data for printing
-    // ======================== FIN: CONSTANTES Y VARIABLES ========================
+    let paperWidth = 32;
+    let currentLostTicket = null;
+    // ===== INICIO: NUEVAS VARIABLES PARA REPORTES =====
+    let allRecords = []; // Cache de todos los tickets
+    let allSales = [];   // Cache de todas las ventas
+    let allExpenses = [];// Cache de todos los gastos
+    let filteredRecords = []; // Cache de tickets filtrados
+    let recordsCurrentPage = 1;
+    const recordsPerPage = 15;
+    let recordsSortColumn = 'entryTime';
+    let recordsSortDirection = 'desc';
+    let dateFilterInstance = null;
+    // ===== FIN: NUEVAS VARIABLES =====
 
     // =====================================================================
     // ======================= INICIO: LÓGICA DE BASE DE DATOS =======================
@@ -106,13 +147,24 @@ document.addEventListener('DOMContentLoaded', () => {
         request.onerror = (event) => console.error('DB Error:', event.target.errorCode);
         request.onupgradeneeded = (event) => {
             db = event.target.result;
-            if (!db.objectStoreNames.contains(TICKET_STORE_NAME)) {
-                const ticketStore = db.createObjectStore(TICKET_STORE_NAME, { keyPath: 'barcode' });
-                ticketStore.createIndex('plate_idx', 'plate', { unique: false });
-                ticketStore.createIndex('status_idx', 'status', { unique: false });
-                ticketStore.createIndex('user_payment_idx', 'userPayment', { unique: false });
-                ticketStore.createIndex('exit_time_idx', 'exitTime', { unique: false });
+            let ticketStore; 
+            if (db.objectStoreNames.contains(TICKET_STORE_NAME)) {
+                ticketStore = event.target.transaction.objectStore(TICKET_STORE_NAME);
+            } else {
+                ticketStore = db.createObjectStore(TICKET_STORE_NAME, { keyPath: 'barcode' });
             }
+
+            if (!ticketStore.indexNames.contains('plate_idx')) ticketStore.createIndex('plate_idx', 'plate', { unique: false });
+            if (!ticketStore.indexNames.contains('status_idx')) ticketStore.createIndex('status_idx', 'status', { unique: false });
+            if (!ticketStore.indexNames.contains('user_payment_idx')) ticketStore.createIndex('user_payment_idx', 'userPayment', { unique: false });
+            if (!ticketStore.indexNames.contains('exit_time_idx')) ticketStore.createIndex('exit_time_idx', 'exitTime', { unique: false });
+            if (!ticketStore.indexNames.contains('plate_status_idx')) ticketStore.createIndex('plate_status_idx', ['plate', 'status'], { unique: false });
+            // ===== INICIO: NUEVO ÍNDICE PARA FILTRAR POR FECHA DE ENTRADA =====
+            if (!ticketStore.indexNames.contains('entry_time_idx')) {
+                ticketStore.createIndex('entry_time_idx', 'entryTime', { unique: false });
+            }
+            // ===== FIN: NUEVO ÍNDICE =====
+
             if (!db.objectStoreNames.contains(COUNTER_STORE_NAME)) db.createObjectStore(COUNTER_STORE_NAME, { keyPath: 'counterId' });
             if (!db.objectStoreNames.contains(SERVICES_STORE_NAME)) db.createObjectStore(SERVICES_STORE_NAME, { keyPath: 'id', autoIncrement: true });
             if (!db.objectStoreNames.contains(SALES_STORE_NAME)) {
@@ -137,12 +189,12 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         request.onsuccess = (event) => {
             db = event.target.result;
-            loadTheme(); // Cargar tema primero para la pantalla de login
+            loadTheme();
             checkSession();
             Promise.all([seedServices(), seedVehicleTypes(), seedUsers()]).then(loadInitialData);
         };
     }
-
+    
     function getObjectStore(storeName, mode) { return db.transaction(storeName, mode).objectStore(storeName); }
 
     async function seedData(storeName, data) {
@@ -294,23 +346,30 @@ document.addEventListener('DOMContentLoaded', () => {
         mainApp.classList.add('hidden');
     }
 
+    // ===== INICIO: FUNCIÓN showMainApp CORREGIDA =====
     function showMainApp() {
         loginScreen.classList.add('opacity-0', 'pointer-events-none');
         mainApp.classList.remove('hidden');
         sessionUsername.textContent = currentUser.name;
         sessionRole.textContent = currentUser.role;
+        
+        // Cargar el menú FAB después de que el rol del usuario esté definido
+        loadFabOptions(); 
+        
         updateDashboardCards();
         barcodeInput.focus();
     }
+    // ===== FIN: FUNCIÓN showMainApp CORREGIDA =====
 
     // ======================== FIN: LÓGICA DE SESIÓN Y CORTE DE CAJA ========================
 
     // =====================================================================
     // ======================= INICIO: CARGA DE DATOS Y DASHBOARD =======================
     // =====================================================================
+    // ===== INICIO: FUNCIÓN loadInitialData CORREGIDA =====
     function loadInitialData() {
         loadPrinterSetting();
-        loadFabOptions();
+        // loadFabOptions(); // Se mueve a showMainApp() para asegurar que el rol del usuario esté cargado
         loadVehicleTypesFromDB();
         loadBusinessInfo();
         loadUsersFromDB();
@@ -319,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const quickChargePref = localStorage.getItem('quickChargeMode') === 'true';
         quickChargeToggle.checked = quickChargePref;
     }
+    // ===== FIN: FUNCIÓN loadInitialData CORREGIDA =====
 
     function formatCurrency(value) {
         return value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
@@ -467,6 +527,21 @@ document.addEventListener('DOMContentLoaded', () => {
         store.getAll().onsuccess = (event) => {
             const services = event.target.result;
             fabOptionsContainer.innerHTML = '';
+
+            // ===== INICIO: AÑADIR BOTÓN DE REPORTES PARA ADMIN =====
+            if (currentUser && currentUser.role === 'Administrador') {
+                const reportsBtn = document.createElement('button');
+                reportsBtn.id = 'reports-btn';
+                reportsBtn.className = 'fab-option bg-base-200 text-teal-600 w-14 h-14 rounded-full flex items-center justify-center';
+                reportsBtn.title = 'Historial de Registros';
+                reportsBtn.innerHTML = `<svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+                reportsBtn.addEventListener('click', () => {
+                    openReportsModal();
+                    fabContainer.classList.remove('active');
+                });
+                fabOptionsContainer.appendChild(reportsBtn);
+            }
+            // ===== FIN: AÑADIR BOTÓN DE REPORTES =====
 
             const expensesBtn = document.createElement('button');
             expensesBtn.id = 'expenses-btn';
@@ -833,10 +908,19 @@ document.addEventListener('DOMContentLoaded', () => {
     async function registerEntry(e) {
         e.preventDefault();
         try {
-            const newBarcode = await generateNewTicketId(currentEntryType);
+            let clientBarcode, businessBarcode;
+            const baseBarcode = await generateNewTicketId(currentEntryType);
+
+            if (currentEntryType === 'hourly') {
+                clientBarcode = baseBarcode;
+                businessBarcode = 'R-' + baseBarcode;
+            } else {
+                clientBarcode = businessBarcode = baseBarcode;
+            }
+
             const selectedVehicleType = vehicleTypesCache.find(v => v.id === parseInt(vehicleTypeSelect.value));
             const newTicket = {
-                barcode: newBarcode,
+                barcode: clientBarcode,
                 plate: newPlateInput.value.trim().toUpperCase(),
                 entryTime: new Date(),
                 status: 'active',
@@ -845,13 +929,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 vehicleTypeName: selectedVehicleType.name,
                 brand: newBrandSelect.value,
                 color: newColorInput.value,
-                userEntry: currentUser.name
+                userEntry: currentUser.name,
+                isLost: false,
+                lostTicketFee: 0
             };
 
             if (currentEntryType === 'pension' || currentEntryType === 'overnight') {
                 newTicket.cost = parseFloat(newPensionAmount.value);
-                newTicket.status = 'paid'; // Paid upfront
-                newTicket.exitTime = new Date(); // Mark as a transaction for today's report
+                newTicket.status = 'paid';
+                newTicket.exitTime = new Date();
                 newTicket.userPayment = currentUser.name;
                 if (currentEntryType === 'pension') {
                     newTicket.pensionTypeName = newPensionTypeInput.value.trim();
@@ -867,7 +953,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 newTicket.cost = null;
             }
             getObjectStore(TICKET_STORE_NAME, 'readwrite').add(newTicket).onsuccess = () => {
-                showToast(`Entrada registrada: ${newBarcode}`, 'success');
+                showToast(`Entrada registrada: ${clientBarcode}`, 'success');
+                
+                printEntryReceipt(newTicket, clientBarcode, businessBarcode);
+
                 toggleModal(newEntryModal, false);
                 resetUI();
                 resetNewEntryForm();
@@ -885,13 +974,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ticketInfoSection.classList.add('hidden');
             return;
         }
-        getObjectStore(TICKET_STORE_NAME, 'readonly').get(barcode).onsuccess = (event) => {
+        
+        const finalBarcode = barcode.startsWith('R-') ? barcode.substring(2) : barcode;
+
+        getObjectStore(TICKET_STORE_NAME, 'readonly').get(finalBarcode).onsuccess = (event) => {
             const ticket = event.target.result;
             if (ticket) {
-                currentTicket = ticket;
                 if (quickChargeToggle.checked && ticket.status === 'active' && ticket.type === 'hourly') {
-                    markTicketAsPaid();
+                    handleQuickCharge(barcode, ticket);
                 } else {
+                    currentTicket = ticket;
                     displayTicketInfo(ticket);
                     ticketInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
@@ -899,6 +991,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Ticket no encontrado.', 'error');
                 ticketInfoSection.classList.add('hidden');
             }
+        };
+    }
+
+    async function handleQuickCharge(originalBarcode, ticket) {
+        if (!ticket || ticket.status !== 'active') return;
+
+        const vehicleType = vehicleTypesCache.find(v => v.id === ticket.vehicleTypeId);
+        if (!vehicleType) {
+            showToast('Error: Tipo de vehículo no encontrado.', 'error');
+            return;
+        }
+
+        let finalCost;
+        let updatedTicket;
+
+        if (originalBarcode.startsWith('R-')) {
+            const { totalCost: stayCost } = calculateStayCost(new Date(ticket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
+            const lostTicketCharge = 50.00;
+            finalCost = stayCost < 100 ? 100.00 : stayCost + lostTicketCharge;
+            const feeApplied = finalCost - stayCost;
+
+            updatedTicket = { 
+                ...ticket, 
+                exitTime: new Date(), 
+                status: 'paid', 
+                cost: finalCost, 
+                userPayment: currentUser.name,
+                isLost: true,
+                lostTicketFee: feeApplied
+            };
+            showToast(`Cobro rápido (Boleto Perdido): ${formatCurrency(finalCost)}`, 'success');
+        } else {
+            const { totalCost } = calculateStayCost(new Date(ticket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
+            finalCost = totalCost;
+            updatedTicket = { 
+                ...ticket, 
+                exitTime: new Date(), 
+                status: 'paid', 
+                cost: finalCost, 
+                userPayment: currentUser.name 
+            };
+            showToast(`Cobro rápido: ${formatCurrency(finalCost)}`, 'success');
+        }
+
+        getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
+            showQuickChargeModal(updatedTicket, finalCost);
+            updateDashboardCards();
         };
     }
 
@@ -970,6 +1109,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 ticketStatusBanner.classList.add('hidden');
             }
         }
+        
+        const adjustButton = document.createElement('button');
+        adjustButton.id = 'adjust-lost-ticket-btn';
+        adjustButton.className = 'w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 shadow-md mt-4';
+        adjustButton.textContent = 'Ajustar Cobro (Boleto Encontrado)';
+        
+        const oldAdjustBtn = document.getElementById('adjust-lost-ticket-btn');
+        if(oldAdjustBtn) oldAdjustBtn.remove();
+        
+        if (ticket.isLost && ticket.status === 'paid') {
+            chargeButton.parentElement.appendChild(adjustButton);
+            adjustButton.addEventListener('click', () => handleFoundLostTicket(ticket));
+        }
     }
 
     function showQuickChargeModal(ticket, totalCost) {
@@ -982,7 +1134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             toggleModal(quickChargeModal, false);
             resetUI();
-        }, 4000); // El modal se oculta después de 4 segundos
+        }, 4000);
     }
 
     async function markTicketAsPaid() {
@@ -997,14 +1149,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
                 currentTicket = updatedTicket;
-                if (quickChargeToggle.checked) {
-                    showQuickChargeModal(updatedTicket, totalCost);
-                } else {
-                    showToast(`Ticket ${updatedTicket.barcode} cobrado: ${formatCurrency(totalCost)}`, 'success');
-                    displayTicketInfo(updatedTicket);
-                    setTimeout(() => { resetUI(); }, 4000);
-                }
+                showToast(`Ticket ${updatedTicket.barcode} cobrado: ${formatCurrency(totalCost)}`, 'success');
+                displayTicketInfo(updatedTicket);
                 updateDashboardCards();
+                setTimeout(() => { resetUI(); }, 4000);
             };
         } catch (error) { showToast('Error al procesar el pago.', 'error'); console.error(error); }
     }
@@ -1189,75 +1337,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function printShiftReportWithQZ() {
-        // 1. Verifica si hay datos para imprimir
         if (!shiftReportData) {
             showToast("No hay datos de reporte para imprimir.", "error");
             return;
         }
 
-        // 2. Verifica si una impresora ha sido seleccionada y guardada
         if (!selectedPrinter) {
             showToast("Impresora no configurada. Vaya a Configuración > Impresión.", "error");
-            // Opcional: abrir el modal de configuración directamente
-            // toggleModal(settingsModal, true);
-            // switchTab('printing');
             return;
         }
 
-        // 3. Verifica si QZ Tray está activo
         if (!qz.websocket.isActive()) {
             showToast("QZ Tray no está conectado. Intentando reconectar...", "error");
-            connectQZ(); // Intenta reconectar automáticamente
+            connectQZ();
             return;
         }
 
-        // 4. Crea la configuración de impresión con la impresora guardada
         const config = qz.configs.create(selectedPrinter);
 
-        // 5. Define los datos del recibo (comandos ESC/POS)
         const data = [
-            '\x1B' + '\x40', // Inicializar impresora
-            '\x1B' + '\x61' + '\x01', // Centrar
-            '\x1B' + '\x21' + '\x20', // Doble altura
+            '\x1B' + '\x40',
+            '\x1B' + '\x61' + '\x01',
+            '\x1B' + '\x21' + '\x20',
             businessInfoCache.name || 'Estacionamiento',
             '\x0A',
-            '\x1B' + '\x21' + '\x00', // Texto normal
+            '\x1B' + '\x21' + '\x00',
             businessInfoCache.address || '',
             '\x0A',
             businessInfoCache.phone || '',
             '\x0A',
-            '\x1B' + '\x61' + '\x00', // Alinear a la izquierda
+            '\x1B' + '\x61' + '\x00',
             '--------------------------------\x0A',
             `Corte para: ${currentUser.name}\x0A`,
             `Fecha: ${new Date().toLocaleString('es-MX')}\x0A`,
             '--------------------------------\x0A',
-            '\x1B' + '\x21' + '\x08', // Negrita
+            '\x1B' + '\x21' + '\x08',
             'INGRESOS\x0A',
-            '\x1B' + '\x21' + '\x00', // Normal
+            '\x1B' + '\x21' + '\x00',
             `Estacionamiento: ${formatCurrency(shiftReportData.parking.total)}\x0A`,
             `Pensiones:       ${formatCurrency(shiftReportData.pensions.total)}\x0A`,
             `Servicios:       ${formatCurrency(shiftReportData.services.total)}\x0A`,
             '--------------------------------\x0A',
-            '\x1B' + '\x21' + '\x08', // Negrita
+            '\x1B' + '\x21' + '\x08',
             `TOTAL INGRESOS:  ${formatCurrency(shiftReportData.totalRevenue)}\x0A`,
-            '\x1B' + '\x21' + '\x00', // Normal
+            '\x1B' + '\x21' + '\x00',
             '\x0A',
-            '\x1B' + '\x21' + '\x08', // Negrita
+            '\x1B' + '\x21' + '\x08',
             'GASTOS\x0A',
-            '\x1B' + '\x21' + '\x00', // Normal
+            '\x1B' + '\x21' + '\x00',
             `Total Gastos:    ${formatCurrency(shiftReportData.expenses.total)}\x0A`,
             '--------------------------------\x0A',
             '\x0A',
-            '\x1B' + '\x21' + '\x10', // Doble ancho
+            '\x1B' + '\x21' + '\x10',
             `TOTAL EN CAJA:   ${formatCurrency(shiftReportData.netTotal)}\x0A`,
             '\x0A',
             '\x0A',
             '\x0A',
             '\x0A',
-            '\x1D' + '\x56' + '\x42' + '\x00' // Cortar papel
+            '\x1D' + '\x56' + '\x42' + '\x00'
         ];
 
-        // 6. Envía los datos a la impresora
         qz.print(config, data).then(() => {
             showToast("Reporte enviado a la impresora.", "success");
         }).catch(err => {
@@ -1265,12 +1404,297 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Error al imprimir. Verifique la impresora y QZ Tray.", "error");
         });
     }
+    
+    function printEntryReceipt(ticket, clientBarcode, businessBarcode) {
+        if (!selectedPrinter) {
+            showToast("Impresora no configurada. Recibo no impreso.", "error");
+            return;
+        }
+        if (!qz.websocket.isActive()) {
+            showToast("QZ Tray no conectado. Recibo no impreso.", "error");
+            connectQZ();
+            return;
+        }
+
+        const config = qz.configs.create(selectedPrinter);
+        
+        const wordWrap = (text, maxWidth) => {
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                if ((currentLine + " " + word).length < maxWidth) {
+                    currentLine += " " + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            lines.push(currentLine);
+            return lines.join('\x0A');
+        };
+
+        const generateReceiptData = (copyType, barcodeData) => {
+            const isClientCopy = copyType === "COPIA CLIENTE";
+            
+            const barcodeCommand = [
+                '\x1D' + '\x68' + '\x64',
+                '\x1D' + '\x77' + '\x02',
+                '\x1D' + '\x48' + '\x02',
+                '\x1D' + '\x6B' + '\x49' + String.fromCharCode(barcodeData.length) + barcodeData
+            ];
+            
+            let entryTypeDescription = "Por Hora";
+            if (ticket.type === 'pension') entryTypeDescription = "Estancia Pagada";
+            if (ticket.type === 'overnight') entryTypeDescription = "Pensión Nocturna";
+
+            const fullClauseText = "1. La empresa solamente entregará el vehículo al portador de este boleto; en caso de extravío deberá acreditar su propiedad. " +
+                                 "2. La empresa no será responsable por: A) Objetos personales no entregados en custodia. B) Robo total o parcial del vehículo y/o accesorios. C) Desperfectos mecánicos y/o eléctricos no imputables a su personal por piezas gastadas o defectuosas. D) Siniestros por causas naturales o ajenas (inundaciones, incendios, temblores, etc.). " +
+                                 "3. Si el vehículo queda fuera del horario, se ingresará al servicio de pensiones nocturnas con un costo de $100 MXN + horas acumuladas. A las 48h sin reclamo se reportará como abandonado. " +
+                                 "4. La entrega y recibido de este boleto implica la aceptación de los términos. " +
+                                 "5. Pérdida del ticket: $100 MXN";
+            
+            const wrappedClause = wordWrap(fullClauseText, paperWidth);
+            
+            const clause = isClientCopy ? [
+                '\x0A',
+                '\x1B' + '\x21' + '\x01', // Fuente pequeña
+                wrappedClause,
+                '\x0A',
+                '\x1B' + '\x21' + '\x00', // Fuente normal
+            ] : [];
+
+            let receiptCommands = [
+                '\x1B' + '\x40',
+                '\x1B' + '\x61' + '\x01',
+                '\x1B' + '\x21' + '\x20',
+                businessInfoCache.name || 'Estacionamiento',
+                '\x0A',
+                '\x1B' + '\x21' + '\x00',
+                businessInfoCache.address || '',
+                '\x0A',
+                '-'.repeat(paperWidth) + '\x0A',
+                '\x1B' + '\x21' + '\x08',
+                'COMPROBANTE DE ENTRADA\x0A',
+                '\x1B' + '\x21' + '\x00',
+                '\x1B' + '\x61' + '\x00',
+                `Ticket: ${ticket.barcode}\x0A`,
+                `Tipo: ${entryTypeDescription}\x0A`,
+                `Fecha: ${formatDateTime(new Date(ticket.entryTime))}\x0A`,
+                `Placa: ${ticket.plate}\x0A`,
+                `Vehiculo: ${ticket.vehicleTypeName}\x0A`,
+                '-'.repeat(paperWidth) + '\x0A',
+                '\x1B' + '\x61' + '\x01',
+                'Conserve este boleto.\x0A',
+                'Indispensable para recoger su vehiculo.\x0A',
+                '\x0A',
+                ...barcodeCommand,
+                '\x0A',
+                ...clause,
+                `--- ${copyType} ---\x0A`,
+                '\x0A', '\x0A', '\x0A',
+                '\x1D' + '\x56' + '\x42' + '\x00'
+            ];
+
+            return receiptCommands;
+        };
+
+        const clientReceiptData = generateReceiptData("COPIA CLIENTE", clientBarcode);
+        const businessReceiptData = generateReceiptData("COPIA NEGOCIO", businessBarcode);
+
+        qz.print(config, clientReceiptData)
+            .then(() => {
+                showToast("Imprimiendo recibo del cliente...", "info");
+                return qz.print(config, businessReceiptData);
+            })
+            .then(() => {
+                showToast("Imprimiendo copia del negocio...", "info");
+            })
+            .catch(err => {
+                console.error(err);
+                showToast("Error al imprimir recibo.", "error");
+            });
+    }
+    
+    // ===== INICIO: NUEVA SECCIÓN DE LÓGICA PARA REPORTES =====
+    function openReportsModal() {
+        // Carga todos los datos necesarios para los reportes
+        Promise.all([
+            new Promise((resolve) => getObjectStore(TICKET_STORE_NAME, 'readonly').getAll().onsuccess = e => resolve(e.target.result)),
+            new Promise((resolve) => getObjectStore(SALES_STORE_NAME, 'readonly').getAll().onsuccess = e => resolve(e.target.result)),
+            new Promise((resolve) => getObjectStore(EXPENSES_STORE_NAME, 'readonly').getAll().onsuccess = e => resolve(e.target.result))
+        ]).then(([tickets, sales, expenses]) => {
+            allRecords = tickets;
+            allSales = sales;
+            allExpenses = expenses;
+            applyReportFilters();
+            toggleModal(reportsModal, true);
+        }).catch(err => {
+            console.error("Error al cargar datos para reportes:", err);
+            showToast('Error al cargar los datos del historial.', 'error');
+        });
+    }
+
+    function applyReportFilters() {
+        const searchTerm = reportSearchFilter.value.toUpperCase();
+        const activeStatusBtn = reportStatusFilterButtons.querySelector('.bg-primary');
+        const statusFilter = activeStatusBtn ? activeStatusBtn.dataset.status : 'all';
+        const dateRange = dateFilterInstance ? dateFilterInstance.selectedDates : [];
+
+        let startDate, endDate;
+        if (dateRange.length === 2) {
+            startDate = dateRange[0];
+            startDate.setHours(0, 0, 0, 0);
+            endDate = dateRange[1];
+            endDate.setHours(23, 59, 59, 999);
+        }
+
+        filteredRecords = allRecords.filter(record => {
+            const searchMatch = searchTerm === '' || record.barcode.toUpperCase().includes(searchTerm) || record.plate.toUpperCase().includes(searchTerm);
+            const statusMatch = statusFilter === 'all' || record.status === statusFilter;
+            const dateMatch = !startDate || (new Date(record.entryTime) >= startDate && new Date(record.entryTime) <= endDate);
+            return searchMatch && statusMatch && dateMatch;
+        });
+
+        sortReportRecords();
+        recordsCurrentPage = 1;
+        renderReportTable();
+        generateSalesReport(filteredRecords, startDate, endDate);
+    }
+
+    function generateSalesReport(records, startDate, endDate) {
+        let parkingRevenue = 0;
+        const userTotals = {};
+
+        // Inicializar usuarios
+        usersCache.forEach(user => {
+            userTotals[user.name] = { parking: 0, services: 0, total: 0 };
+        });
+
+        records.forEach(ticket => {
+            if (ticket.status === 'paid' && ticket.cost > 0) {
+                parkingRevenue += ticket.cost;
+                if (ticket.userPayment && userTotals[ticket.userPayment]) {
+                    userTotals[ticket.userPayment].parking += ticket.cost;
+                    userTotals[ticket.userPayment].total += ticket.cost;
+                }
+            }
+        });
+
+        const filteredSales = allSales.filter(sale => {
+            return !startDate || (new Date(sale.timestamp) >= startDate && new Date(sale.timestamp) <= endDate);
+        });
+
+        const servicesRevenue = filteredSales.reduce((sum, sale) => {
+            if (sale.user && userTotals[sale.user]) {
+                userTotals[sale.user].services += sale.price;
+                userTotals[sale.user].total += sale.price;
+            }
+            return sum + sale.price;
+        }, 0);
+
+        const filteredExpenses = allExpenses.filter(expense => {
+            if (!startDate) return true;
+            const expenseDate = new Date(expense.date + 'T00:00:00');
+            return expenseDate >= startDate && expenseDate <= endDate;
+        });
+
+        const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+        const netTotal = (parkingRevenue + servicesRevenue) - totalExpenses;
+
+        renderSalesReport({ parkingRevenue, servicesRevenue, totalExpenses, netTotal, userTotals });
+    }
+
+    function renderSalesReport(summary) {
+        reportParkingRevenue.textContent = formatCurrency(summary.parkingRevenue);
+        reportServicesRevenue.textContent = formatCurrency(summary.servicesRevenue);
+        reportExpensesTotal.textContent = formatCurrency(summary.totalExpenses);
+        reportNetTotal.textContent = formatCurrency(summary.netTotal);
+
+        reportUserBreakdown.innerHTML = '';
+        if (Object.keys(summary.userTotals).length === 0) {
+            reportUserBreakdown.innerHTML = '<p class="col-span-full text-center text-sm text-base-content-secondary">No hay datos de usuarios.</p>';
+            return;
+        }
+        
+        for (const userName in summary.userTotals) {
+            const user = summary.userTotals[userName];
+            if (user.total > 0) {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'bg-base-100 p-2 rounded-lg text-xs';
+                userDiv.innerHTML = `
+                    <p class="font-bold truncate">${userName}</p>
+                    <p class="text-green-500 font-medium">${formatCurrency(user.total)}</p>
+                `;
+                reportUserBreakdown.appendChild(userDiv);
+            }
+        }
+    }
 
 
+    function sortReportRecords() {
+        filteredRecords.sort((a, b) => {
+            let valA = a[recordsSortColumn];
+            let valB = b[recordsSortColumn];
 
-    // ======================== FIN: LÓGICA DE CORTE DE CAJA E IMPRESIÓN ========================
+            if (recordsSortColumn === 'entryTime' || recordsSortColumn === 'exitTime') {
+                valA = valA ? new Date(valA).getTime() : 0;
+                valB = valB ? new Date(valB).getTime() : 0;
+            }
+            
+            if (valA < valB) return recordsSortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return recordsSortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
 
+    function renderReportTable() {
+        reportsTableBody.innerHTML = '';
+        const startIndex = (recordsCurrentPage - 1) * recordsPerPage;
+        const endIndex = startIndex + recordsPerPage;
+        const pageRecords = filteredRecords.slice(startIndex, endIndex);
 
+        if (pageRecords.length === 0) {
+            reportsTableBody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-base-content-secondary">No se encontraron registros.</td></tr>`;
+        } else {
+            pageRecords.forEach(record => {
+                const statusClasses = {
+                    active: 'bg-blue-100 text-blue-800',
+                    paid: 'bg-green-100 text-green-800',
+                    cancelled: 'bg-red-100 text-red-800'
+                };
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-base-100';
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${record.barcode}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${record.plate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${formatDateTime(record.entryTime)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${formatDateTime(record.exitTime)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClasses[record.status] || ''}">
+                            ${record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold">${record.cost !== null ? formatCurrency(record.cost) : 'N/A'}</td>
+                `;
+                reportsTableBody.appendChild(tr);
+            });
+        }
+        updatePaginationControls();
+    }
+
+    function updatePaginationControls() {
+        const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+        reportPageInfo.textContent = `Página ${recordsCurrentPage} de ${totalPages > 0 ? totalPages : 1}`;
+        reportRecordsInfo.textContent = `Mostrando ${filteredRecords.length > 0 ? ((recordsCurrentPage - 1) * recordsPerPage) + 1 : 0} a ${Math.min(recordsCurrentPage * recordsPerPage, filteredRecords.length)} de ${filteredRecords.length} registros.`;
+        reportPrevPageBtn.disabled = recordsCurrentPage === 1;
+        reportNextPageBtn.disabled = recordsCurrentPage === totalPages || totalPages === 0;
+    }
+    // ===== FIN: NUEVA SECCIÓN DE LÓGICA PARA REPORTES =====
+    
     // =====================================================================
     // ======================= INICIO: LÓGICA DE LA CALCULADORA =======================
     // =====================================================================
@@ -1620,6 +2044,8 @@ document.addEventListener('DOMContentLoaded', () => {
             printerSelect.disabled = true;
             savePrinterBtn.disabled = true;
             savePrinterBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            testPrintBtn.disabled = true;
+            testPrintBtn.classList.add('opacity-50', 'cursor-not-allowed');
         }
     }
 
@@ -1650,6 +2076,8 @@ document.addEventListener('DOMContentLoaded', () => {
             printerSelect.disabled = false;
             savePrinterBtn.disabled = false;
             savePrinterBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            testPrintBtn.disabled = false;
+            testPrintBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }).catch(err => {
             console.error(err);
             showToast("Error al buscar impresoras.", "error");
@@ -1658,27 +2086,153 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function savePrinterSelection() {
         const printerName = printerSelect.value;
+        const width = parseInt(paperWidthSlider.value);
+
         if (!printerName) {
             showToast("Seleccione una impresora válida.", "error");
             return;
         }
-        const setting = { id: 1, printerName: printerName };
+        const setting = { id: 1, printerName: printerName, paperWidth: width };
         getObjectStore(PRINTER_SETTINGS_STORE_NAME, 'readwrite').put(setting).onsuccess = () => {
             selectedPrinter = printerName;
-            showToast(`Impresora "${printerName}" guardada.`, "success");
+            paperWidth = width;
+            showToast(`Configuración de impresora guardada.`, "success");
         };
     }
 
     function loadPrinterSetting() {
         getObjectStore(PRINTER_SETTINGS_STORE_NAME, 'readonly').get(1).onsuccess = (event) => {
             const setting = event.target.result;
-            if (setting && setting.printerName) {
-                selectedPrinter = setting.printerName;
-                // Intenta conectar automáticamente al iniciar
+            if (setting) {
+                if (setting.printerName) {
+                    selectedPrinter = setting.printerName;
+                }
+                if (setting.paperWidth) {
+                    paperWidth = setting.paperWidth;
+                    paperWidthSlider.value = setting.paperWidth;
+                    paperWidthValue.textContent = `${setting.paperWidth} chars`;
+                }
                 connectQZ();
             }
         };
     }
+    
+    // =====================================================================
+    // ======================= INICIO: NUEVA LÓGICA PARA BOLETO PERDIDO =======================
+    // =====================================================================
+    
+    function findActiveTicketByPlate(plate) {
+        lostTicketResults.classList.add('hidden');
+        if (!plate) return;
+
+        const range = IDBKeyRange.only([plate, 'active']);
+        const index = getObjectStore(TICKET_STORE_NAME, 'readonly').index('plate_status_idx');
+        
+        index.get(range).onsuccess = (event) => {
+            const ticket = event.target.result;
+            if (ticket) {
+                currentLostTicket = ticket;
+                displayLostTicketInfo(ticket);
+            } else {
+                showToast('No se encontró ningún vehículo activo con esa placa.', 'error');
+                currentLostTicket = null;
+            }
+        };
+    }
+
+    function displayLostTicketInfo(ticket) {
+        const vehicleType = vehicleTypesCache.find(v => v.id === ticket.vehicleTypeId);
+        if (!vehicleType) {
+            showToast('Error: Tipo de vehículo no encontrado.', 'error');
+            return;
+        }
+
+        const { totalCost: stayCost } = calculateStayCost(new Date(ticket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
+        
+        const lostTicketCharge = 50.00;
+        const finalCost = stayCost < 100 ? 100.00 : stayCost + lostTicketCharge;
+        const feeApplied = finalCost - stayCost;
+
+        lostTicketInfo.innerHTML = `
+            <p><span class="font-semibold">Ticket:</span> ${ticket.barcode}</p>
+            <p><span class="font-semibold">Vehículo:</span> ${ticket.vehicleTypeName} - ${ticket.brand} ${ticket.color}</p>
+            <p><span class="font-semibold">Entrada:</span> ${formatDateTime(ticket.entryTime)}</p>
+        `;
+        
+        lostTicketBreakdown.innerHTML = `
+            <div class="flex justify-between items-center">
+                <p>Costo por tiempo de estancia:</p>
+                <p class="font-semibold">${formatCurrency(stayCost)}</p>
+            </div>
+            <div class="flex justify-between items-center">
+                <p>Cargo por boleto perdido:</p>
+                <p class="font-semibold">${formatCurrency(feeApplied)}</p>
+            </div>
+        `;
+
+        lostTicketTotalCost.textContent = formatCurrency(finalCost);
+        lostTicketResults.classList.remove('hidden');
+    }
+    
+    function chargeLostTicket() {
+        if (!currentLostTicket) return;
+
+        const vehicleType = vehicleTypesCache.find(v => v.id === currentLostTicket.vehicleTypeId);
+        const { totalCost: stayCost } = calculateStayCost(new Date(currentLostTicket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
+        const lostTicketCharge = 50.00;
+        const finalCost = stayCost < 100 ? 100.00 : stayCost + lostTicketCharge;
+        const feeApplied = finalCost - stayCost;
+        
+        const updatedTicket = { 
+            ...currentLostTicket, 
+            exitTime: new Date(), 
+            status: 'paid', 
+            cost: finalCost, 
+            userPayment: currentUser.name,
+            isLost: true,
+            lostTicketFee: feeApplied
+        };
+
+        getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
+            showToast(`Cobro por boleto perdido realizado: ${formatCurrency(finalCost)}`, 'success');
+            toggleModal(lostTicketModal, false);
+            resetUI();
+            updateDashboardCards();
+            currentLostTicket = null;
+        };
+    }
+
+    function handleFoundLostTicket(ticket) {
+        if (!ticket.isLost || ticket.status !== 'paid') return;
+
+        const refundAmount = ticket.lostTicketFee;
+        const message = `Este boleto se cobró como perdido. Al presentar el boleto, se ajustará el cobro y se reembolsará el cargo por boleto perdido.<br><br><strong class="text-xl">Reembolsar: ${formatCurrency(refundAmount)}</strong>`;
+
+        showConfirmModal(message, () => {
+            const originalCost = ticket.cost - refundAmount;
+            const updatedTicket = {
+                ...ticket,
+                cost: originalCost,
+                isLost: false,
+                lostTicketFee: 0,
+                notes: `Ajuste por boleto encontrado. Reembolso de ${formatCurrency(refundAmount)} por ${currentUser.name} el ${formatDateTime(new Date())}`
+            };
+
+            getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
+                showToast('Cobro ajustado y reembolso registrado.', 'success');
+                displayTicketInfo(updatedTicket);
+                updateDashboardCards();
+            };
+        });
+    }
+
+    function resetLostTicketModal() {
+        lostTicketForm.reset();
+        lostTicketResults.classList.add('hidden');
+        currentLostTicket = null;
+    }
+    // ======================== FIN: NUEVA LÓGICA PARA BOLETO PERDIDO =======================
+
 
     // =====================================================================
     // ======================= INICIO: EVENT LISTENERS =======================
@@ -1775,6 +2329,82 @@ document.addEventListener('DOMContentLoaded', () => {
     closeServicesRevenueBtn.addEventListener('click', () => toggleModal(servicesRevenueModal, false));
     connectQzBtn.addEventListener('click', connectQZ);
     savePrinterBtn.addEventListener('click', savePrinterSelection);
+    
+    paperWidthSlider.addEventListener('input', (e) => {
+        paperWidthValue.textContent = `${e.target.value} chars`;
+    });
+
+    testPrintBtn.addEventListener('click', () => {
+        paperWidth = parseInt(paperWidthSlider.value); 
+        const testTicket = {
+            barcode: 'TKT-TEST-01',
+            type: 'hourly',
+            entryTime: new Date(),
+            plate: 'TEST-001',
+            vehicleTypeName: 'Vehículo de Prueba'
+        };
+        printEntryReceipt(testTicket, 'TKT-TEST-01', 'R-TKT-TEST-01');
+    });
+    
+    lostTicketBtn.addEventListener('click', () => {
+        resetLostTicketModal();
+        toggleModal(lostTicketModal, true);
+    });
+    
+    closeLostTicketModalBtn.addEventListener('click', () => toggleModal(lostTicketModal, false));
+    
+    lostTicketForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const plate = lostTicketPlateInput.value.trim().toUpperCase();
+        findActiveTicketByPlate(plate);
+    });
+
+    chargeLostTicketBtn.addEventListener('click', chargeLostTicket);
+    
+    // ===== INICIO: EVENT LISTENERS PARA REPORTES =====
+    closeReportsModalBtn.addEventListener('click', () => toggleModal(reportsModal, false));
+    reportSearchFilter.addEventListener('input', () => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(applyReportFilters, 300);
+    });
+    reportStatusFilterButtons.addEventListener('click', (e) => {
+        if (e.target.matches('button')) {
+            reportStatusFilterButtons.querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-primary-content');
+                btn.classList.add('text-base-content-secondary');
+            });
+            e.target.classList.add('bg-primary', 'text-primary-content');
+            e.target.classList.remove('text-base-content-secondary');
+            applyReportFilters();
+        }
+    });
+    document.querySelector('#reports-modal thead').addEventListener('click', (e) => {
+        if (e.target.matches('[data-sort]')) {
+            const sortKey = e.target.dataset.sort;
+            if (recordsSortColumn === sortKey) {
+                recordsSortDirection = recordsSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                recordsSortColumn = sortKey;
+                recordsSortDirection = 'desc';
+            }
+            sortReportRecords();
+            renderReportTable();
+        }
+    });
+    reportPrevPageBtn.addEventListener('click', () => {
+        if (recordsCurrentPage > 1) {
+            recordsCurrentPage--;
+            renderReportTable();
+        }
+    });
+    reportNextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+        if (recordsCurrentPage < totalPages) {
+            recordsCurrentPage++;
+            renderReportTable();
+        }
+    });
+    // ===== FIN: EVENT LISTENERS PARA REPORTES =====
     // ======================== FIN: EVENT LISTENERS ========================
 
     // Inicialización
@@ -1782,6 +2412,16 @@ document.addEventListener('DOMContentLoaded', () => {
     populateColorSuggestions();
 
     // Inicializar Flatpickr
+    dateFilterInstance = flatpickr(reportDateFilter, {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        locale: "es",
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length === 2) {
+                applyReportFilters();
+            }
+        }
+    });
     flatpickr(calcEntryTime, { enableTime: true, dateFormat: "Y-m-d H:i", time_24hr: true, defaultDate: new Date(), locale: "es" });
     flatpickr(calcExitTime, { enableTime: true, dateFormat: "Y-m-d H:i", time_24hr: true, defaultDate: new Date(), locale: "es" });
 });

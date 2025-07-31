@@ -191,12 +191,20 @@
                         <label for="barcode-input"
                             class="block text-sm font-medium text-base-content-secondary">Escanear Código de
                             Barras</label>
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-base-content-secondary">Cobro Rápido</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="quick-charge-toggle">
-                                <span class="slider"></span>
-                            </label>
+                        <div class="flex items-center gap-4"> <!-- Modificado para tener más espacio (gap-4) -->
+                            <!-- NUEVO BOTÓN A AGREGAR -->
+                            <button id="lost-ticket-btn" class="text-sm font-semibold text-blue-600 hover:underline">
+                                ¿Boleto Perdido?
+                            </button>
+                            <!-- FIN DEL NUEVO BOTÓN -->
+
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-base-content-secondary">Cobro Rápido</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="quick-charge-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                     <div class="relative">
@@ -888,10 +896,25 @@
                                 <option>Conecte a QZ Tray para buscar impresoras</option>
                             </select>
                         </div>
-                        <div class="flex justify-end pt-4">
+                        <div>
+                            <label for="paper-width-slider" class="block text-sm font-medium text-base-content">Ancho
+                                del Papel</label>
+                            <div class="flex items-center gap-4 mt-1">
+                                <input type="range" id="paper-width-slider" min="24" max="48" value="32"
+                                    class="w-full h-2 bg-base-300 rounded-lg appearance-none cursor-pointer">
+                                <span id="paper-width-value" class="font-bold text-primary text-lg w-24 text-center">32
+                                    chars</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-4">
+                            <button id="test-print-btn" type="button"
+                                class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 text-sm opacity-50 cursor-not-allowed"
+                                disabled>
+                                Probar Impresión de Recibo
+                            </button>
                             <button id="save-printer-btn"
                                 class="bg-primary text-primary-content font-bold py-2 px-6 rounded-lg hover:bg-primary-focus text-sm opacity-50 cursor-not-allowed"
-                                disabled>Guardar Impresora</button>
+                                disabled>Guardar Cambios</button>
                         </div>
                     </div>
                 </div>
@@ -961,6 +984,181 @@
                     class="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors">
                     Cerrar Sesión
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lost-ticket-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center modal-backdrop opacity-0 pointer-events-none">
+        <div class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-lg opacity-0 scale-95 transform">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-base-content">Cobro de Boleto Perdido</h2>
+                <button id="close-lost-ticket-modal"
+                    class="text-base-content-secondary hover:text-base-content text-3xl leading-none">&times;</button>
+            </div>
+
+            <!-- Formulario para buscar por placa -->
+            <form id="lost-ticket-form" class="space-y-4">
+                <div>
+                    <label for="lost-ticket-plate-input" class="form-label text-base-content">
+                        <svg class="form-icon text-base-content-secondary" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        <span>Ingresar Placa del Vehículo</span>
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="lost-ticket-plate-input" placeholder="ABC-123"
+                            class="form-input focus-style bg-base-300 input-bordered uppercase" required>
+                        <button type="submit"
+                            class="bg-primary text-primary-content font-bold py-2 px-4 rounded-lg hover:bg-primary-focus">Buscar</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Resultados y desglose del cobro -->
+            <div id="lost-ticket-results" class="hidden mt-6 pt-6 border-t border-theme">
+                <div id="lost-ticket-info" class="mb-4 bg-base-100 p-4 rounded-lg">
+                    <!-- La información del ticket encontrado se inyectará aquí -->
+                </div>
+                <div id="lost-ticket-breakdown" class="space-y-3 mb-4">
+                    <!-- El desglose del costo se inyectará aquí -->
+                </div>
+                <div
+                    class="bg-base-content text-base-200 p-4 rounded-lg flex justify-between items-center shadow-inner">
+                    <p class="text-xl font-bold">TOTAL A PAGAR:</p>
+                    <p id="lost-ticket-total-cost" class="text-3xl font-extrabold"></p>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button id="charge-lost-ticket-btn"
+                        class="w-full sm:w-auto bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-all duration-300 shadow-md">Cobrar
+                        Boleto Perdido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Modal -->
+    <div id="reports-modal"
+        class="fixed inset-0 z-[100] flex items-center justify-center modal-backdrop opacity-0 pointer-events-none bg-base-100/95 backdrop-blur-sm">
+        <div
+            class="modal-content bg-base-200 rounded-lg shadow-xl p-8 w-full max-w-7xl h-[90vh] flex flex-col opacity-0 scale-95 transform">
+            <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                <h2 class="text-2xl font-bold text-base-content">Historial de Registros</h2>
+                <button id="close-reports-modal"
+                    class="text-base-content-secondary hover:text-base-content text-3xl leading-none">&times;</button>
+            </div>
+
+            <!-- Resumen Financiero y por Usuario -->
+            <div id="report-summary-section" class="mb-6 flex-shrink-0">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <!-- Card Ingresos Estacionamiento -->
+                    <div class="bg-base-100 p-4 rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-base-content-secondary">Ingresos (Est.)</h4>
+                        <p id="report-parking-revenue" class="text-2xl font-bold text-green-500 mt-1">Cargando...</p>
+                    </div>
+                    <!-- Card Ingresos Servicios -->
+                    <div class="bg-base-100 p-4 rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-base-content-secondary">Ingresos (Serv.)</h4>
+                        <p id="report-services-revenue" class="text-2xl font-bold text-sky-500 mt-1">Cargando...</p>
+                    </div>
+                    <!-- Card Gastos -->
+                    <div class="bg-base-100 p-4 rounded-lg shadow">
+                        <h4 class="text-sm font-medium text-base-content-secondary">Total Gastos</h4>
+                        <p id="report-expenses-total" class="text-2xl font-bold text-red-500 mt-1">Cargando...</p>
+                    </div>
+                    <!-- Card Total Neto -->
+                    <div class="bg-base-300 p-4 rounded-lg shadow-inner">
+                        <h4 class="text-sm font-bold text-base-content">Total Neto en Caja</h4>
+                        <p id="report-net-total" class="text-2xl font-extrabold text-primary mt-1">Cargando...</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-base-content-secondary mb-2">Desglose por Usuario
+                        (Estacionamiento + Servicios)</h4>
+                    <div id="report-user-breakdown" class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <!-- El desglose por usuario se inyectará aquí -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== INICIO: SECCIÓN DE FILTROS CORREGIDA ===== -->
+            <!-- Filtros -->
+            <div class="flex flex-wrap items-end gap-4 mb-4 flex-shrink-0">
+                <div class="flex-grow">
+                    <label for="report-date-filter" class="text-sm font-medium text-base-content-secondary">Filtrar por
+                        Fecha de Entrada</label>
+                    <input type="text" id="report-date-filter" placeholder="Seleccione un rango de fechas"
+                        class="form-input focus-style bg-base-300 input-bordered mt-1 w-full">
+                </div>
+                <div class="flex-grow">
+                    <label for="report-search-filter" class="text-sm font-medium text-base-content-secondary">Buscar por
+                        Ticket o Placa</label>
+                    <input type="text" id="report-search-filter" placeholder="Escriba para buscar..."
+                        class="form-input focus-style bg-base-300 input-bordered mt-1 w-full">
+                </div>
+                <div class="flex-shrink-0">
+                    <label class="text-sm font-medium text-base-content-secondary">Filtrar por Estado</label>
+                    <div id="report-status-filter-buttons"
+                        class="grid grid-cols-4 gap-1 p-1 bg-base-300 rounded-lg mt-1">
+                        <button data-status="all"
+                            class="px-3 py-1 text-xs font-bold rounded-md transition-colors bg-primary text-primary-content">Todos</button>
+                        <button data-status="active"
+                            class="px-3 py-1 text-xs font-bold rounded-md transition-colors text-base-content-secondary">Activos</button>
+                        <button data-status="paid"
+                            class="px-3 py-1 text-xs font-bold rounded-md transition-colors text-base-content-secondary">Pagados</button>
+                        <button data-status="cancelled"
+                            class="px-3 py-1 text-xs font-bold rounded-md transition-colors text-base-content-secondary">Cancelados</button>
+                    </div>
+                </div>
+            </div>
+            <!-- ===== FIN: SECCIÓN DE FILTROS CORREGIDA ===== -->
+
+            <!-- Tabla de Registros -->
+            <div class="overflow-y-auto flex-grow">
+                <table class="min-w-full divide-y divide-theme">
+                    <thead class="bg-base-300">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-bold text-base-content uppercase tracking-wider cursor-pointer"
+                                data-sort="barcode">Ticket ⇅</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-bold text-base-content uppercase tracking-wider cursor-pointer"
+                                data-sort="plate">Placa ⇅</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-bold text-base-content uppercase tracking-wider cursor-pointer"
+                                data-sort="entryTime">Entrada ⇅</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-bold text-base-content uppercase tracking-wider cursor-pointer"
+                                data-sort="exitTime">Salida ⇅</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-bold text-base-content uppercase tracking-wider">
+                                Estado</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-bold text-base-content uppercase tracking-wider cursor-pointer"
+                                data-sort="cost">Total ⇅</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reports-table-body" class="bg-base-200 divide-y divide-theme">
+                        <!-- Las filas se inyectarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div id="reports-pagination-controls"
+                class="flex justify-between items-center pt-4 mt-4 border-t border-theme flex-shrink-0">
+                <span id="report-records-info" class="text-sm text-base-content-secondary"></span>
+                <div class="flex items-center gap-2">
+                    <button id="report-prev-page-btn"
+                        class="px-3 py-1 border border-theme rounded-md text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed">&lt;
+                        Anterior</button>
+                    <span id="report-page-info" class="text-sm font-medium"></span>
+                    <button id="report-next-page-btn"
+                        class="px-3 py-1 border border-theme rounded-md text-sm hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente
+                        &gt;</button>
+                </div>
             </div>
         </div>
     </div>
