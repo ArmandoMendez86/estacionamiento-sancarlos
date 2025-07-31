@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================= INICIO: CONSTANTES Y VARIABLES =======================
     // =====================================================================
     const DB_NAME = 'parkingLotDB';
-    const DB_VERSION = 16; // VERSIÓN INCREMENTADA PARA NUEVO ÍNDICE
+    const DB_VERSION = 18; // VERSIÓN INCREMENTADA PARA NUEVO ÍNDICE
     const TICKET_STORE_NAME = 'tickets';
     const COUNTER_STORE_NAME = 'counters';
     const SERVICES_STORE_NAME = 'services';
@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const EXPENSES_STORE_NAME = 'expenses';
     const MONTH_NAMES = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
     const PRINTER_SETTINGS_STORE_NAME = 'printerSettings';
+    const DEFAULTER_STORE_NAME = 'defaulters';
 
     const BRANDS = { Carro: ["Nissan", "Chevrolet", "Volkswagen", "Toyota", "Honda", "Ford", "Kia", "Mazda", "Otro"], Moto: ["Italika", "Honda", "Yamaha", "Suzuki", "Bajaj", "Vento", "Otro"] };
     const COLORS = ["Blanco", "Negro", "Gris", "Plata", "Rojo", "Azul", "Verde"];
@@ -112,6 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const reportExpensesTotal = document.getElementById('report-expenses-total');
     const reportNetTotal = document.getElementById('report-net-total');
     const reportUserBreakdown = document.getElementById('report-user-breakdown');
+    const waiveHoursBtn = document.getElementById('waive-hours-btn');
+    const markAsDefaulterBtn = document.getElementById('mark-as-defaulter-btn');
     // ===== FIN: NUEVOS ELEMENTOS DOM =====
 
     let db;
@@ -147,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         request.onerror = (event) => console.error('DB Error:', event.target.errorCode);
         request.onupgradeneeded = (event) => {
             db = event.target.result;
-            let ticketStore; 
+            let ticketStore;
             if (db.objectStoreNames.contains(TICKET_STORE_NAME)) {
                 ticketStore = event.target.transaction.objectStore(TICKET_STORE_NAME);
             } else {
@@ -159,12 +162,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!ticketStore.indexNames.contains('user_payment_idx')) ticketStore.createIndex('user_payment_idx', 'userPayment', { unique: false });
             if (!ticketStore.indexNames.contains('exit_time_idx')) ticketStore.createIndex('exit_time_idx', 'exitTime', { unique: false });
             if (!ticketStore.indexNames.contains('plate_status_idx')) ticketStore.createIndex('plate_status_idx', ['plate', 'status'], { unique: false });
-            // ===== INICIO: NUEVO ÍNDICE PARA FILTRAR POR FECHA DE ENTRADA =====
             if (!ticketStore.indexNames.contains('entry_time_idx')) {
                 ticketStore.createIndex('entry_time_idx', 'entryTime', { unique: false });
             }
-            // ===== FIN: NUEVO ÍNDICE =====
-
+            if (!ticketStore.indexNames.contains('is_defaulter_idx')) {
+                ticketStore.createIndex('is_defaulter_idx', 'isDefaulter', { unique: false });
+            }
+            if (!db.objectStoreNames.contains(DEFAULTER_STORE_NAME)) {
+                const defaulterStore = db.createObjectStore(DEFAULTER_STORE_NAME, { keyPath: 'plate' });
+                defaulterStore.createIndex('date_marked_idx', 'dateMarked', { unique: false });
+            }
             if (!db.objectStoreNames.contains(COUNTER_STORE_NAME)) db.createObjectStore(COUNTER_STORE_NAME, { keyPath: 'counterId' });
             if (!db.objectStoreNames.contains(SERVICES_STORE_NAME)) db.createObjectStore(SERVICES_STORE_NAME, { keyPath: 'id', autoIncrement: true });
             if (!db.objectStoreNames.contains(SALES_STORE_NAME)) {
@@ -194,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Promise.all([seedServices(), seedVehicleTypes(), seedUsers()]).then(loadInitialData);
         };
     }
-    
+
     function getObjectStore(storeName, mode) { return db.transaction(storeName, mode).objectStore(storeName); }
 
     async function seedData(storeName, data) {
@@ -352,10 +359,10 @@ document.addEventListener('DOMContentLoaded', () => {
         mainApp.classList.remove('hidden');
         sessionUsername.textContent = currentUser.name;
         sessionRole.textContent = currentUser.role;
-        
+
         // Cargar el menú FAB después de que el rol del usuario esté definido
-        loadFabOptions(); 
-        
+        loadFabOptions();
+
         updateDashboardCards();
         barcodeInput.focus();
     }
@@ -434,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let parkingRevenue = 0;
             let pensionRevenue = 0;
             paidTickets.forEach(ticket => {
-                if (ticket.status === 'paid') {
+                if (ticket.status === 'paid' || (ticket.status === 'moroso' && ticket.cost > 0)) {
                     if (ticket.type === 'hourly' || (ticket.type === 'overnight' && ticket.originalPensionCost)) {
                         parkingRevenue += ticket.cost;
                     } else if (ticket.type === 'pension' || ticket.type === 'overnight') {
@@ -858,15 +865,40 @@ document.addEventListener('DOMContentLoaded', () => {
         COLORS.forEach(color => colorSuggestions.appendChild(Object.assign(document.createElement('option'), { value: color })));
     }
 
+    // En js/main.js, reemplaza tu función findPreviousEntryByPlate existente
+
     async function findPreviousEntryByPlate() {
         const plate = newPlateInput.value.trim().toUpperCase();
+        const defaulterWarningMsg = document.getElementById('defaulter-warning-msg');
+
+        // Resetear mensajes
         plateLookupMsg.textContent = '';
+        defaulterWarningMsg.classList.add('hidden');
+        defaulterWarningMsg.innerHTML = '';
+
         if (!plate) return;
-        const index = getObjectStore(TICKET_STORE_NAME, 'readonly').index('plate_idx');
-        const request = index.getAll(plate);
-        request.onsuccess = () => {
-            if (request.result && request.result.length > 0) {
-                const lastEntry = request.result.sort((a, b) => new Date(b.entryTime) - new Date(a.entryTime))[0];
+
+        // 1. PRIMERO, VERIFICAR SI ES MOROSO (LA CONSULTA MÁS IMPORTANTE)
+        const defaulterStore = getObjectStore(DEFAULTER_STORE_NAME, 'readonly');
+        const defaulterRequest = defaulterStore.get(plate);
+
+        defaulterRequest.onsuccess = () => {
+            const defaulterRecord = defaulterRequest.result;
+            if (defaulterRecord) {
+                defaulterWarningMsg.innerHTML = `
+                <p class="font-bold">¡ALERTA DE MOROSO!</p>
+                <p>Esta placa tiene un adeudo pendiente de <strong>${formatCurrency(defaulterRecord.unpaidAmount)}</strong> del ticket ${defaulterRecord.ticketBarcode}.</p>
+            `;
+                defaulterWarningMsg.classList.remove('hidden');
+            }
+        };
+
+        // 2. LUEGO, BUSCAR DATOS ANTERIORES PARA AUTOCOMPLETAR (como ya lo hacía)
+        const ticketIndex = getObjectStore(TICKET_STORE_NAME, 'readonly').index('plate_idx');
+        const ticketRequest = ticketIndex.getAll(plate);
+        ticketRequest.onsuccess = () => {
+            if (ticketRequest.result && ticketRequest.result.length > 0) {
+                const lastEntry = ticketRequest.result.sort((a, b) => new Date(b.entryTime) - new Date(a.entryTime))[0];
                 vehicleTypeSelect.value = lastEntry.vehicleTypeId;
                 updateBrandSelect();
                 setTimeout(() => {
@@ -883,7 +915,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-
     async function generateNewTicketId(type) {
         return new Promise((resolve, reject) => {
             const prefix = (type === 'hourly') ? 'TKT' : 'PEN';
@@ -954,7 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             getObjectStore(TICKET_STORE_NAME, 'readwrite').add(newTicket).onsuccess = () => {
                 showToast(`Entrada registrada: ${clientBarcode}`, 'success');
-                
+
                 printEntryReceipt(newTicket, clientBarcode, businessBarcode);
 
                 toggleModal(newEntryModal, false);
@@ -974,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ticketInfoSection.classList.add('hidden');
             return;
         }
-        
+
         const finalBarcode = barcode.startsWith('R-') ? barcode.substring(2) : barcode;
 
         getObjectStore(TICKET_STORE_NAME, 'readonly').get(finalBarcode).onsuccess = (event) => {
@@ -1012,11 +1043,11 @@ document.addEventListener('DOMContentLoaded', () => {
             finalCost = stayCost < 100 ? 100.00 : stayCost + lostTicketCharge;
             const feeApplied = finalCost - stayCost;
 
-            updatedTicket = { 
-                ...ticket, 
-                exitTime: new Date(), 
-                status: 'paid', 
-                cost: finalCost, 
+            updatedTicket = {
+                ...ticket,
+                exitTime: new Date(),
+                status: 'paid',
+                cost: finalCost,
                 userPayment: currentUser.name,
                 isLost: true,
                 lostTicketFee: feeApplied
@@ -1025,12 +1056,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const { totalCost } = calculateStayCost(new Date(ticket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
             finalCost = totalCost;
-            updatedTicket = { 
-                ...ticket, 
-                exitTime: new Date(), 
-                status: 'paid', 
-                cost: finalCost, 
-                userPayment: currentUser.name 
+            updatedTicket = {
+                ...ticket,
+                exitTime: new Date(),
+                status: 'paid',
+                cost: finalCost,
+                userPayment: currentUser.name
             };
             showToast(`Cobro rápido: ${formatCurrency(finalCost)}`, 'success');
         }
@@ -1046,6 +1077,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelPensionBtn.classList.add('hidden');
         convertToOvernightBtn.classList.add('hidden');
         cancelTicketBtn.classList.add('hidden');
+        waiveHoursBtn.classList.add('hidden');
+        markAsDefaulterBtn.classList.add('hidden');
 
         if (ticket.type === 'pension' || (ticket.type === 'overnight' && !ticket.originalPensionCost)) {
             hourlyDetails.classList.add('hidden');
@@ -1098,6 +1131,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 ticketStatusBanner.className = 'p-3 rounded-lg mb-4 text-center font-bold bg-red-100 text-red-800';
                 ticketStatusBanner.classList.remove('hidden');
             } else { // Active
+
+                if (currentUser.role === 'Administrador') {
+                    waiveHoursBtn.classList.remove('hidden');
+                    markAsDefaulterBtn.classList.remove('hidden');
+                }
                 timeElapsedHourly.textContent = formatElapsedTime(new Date().getTime() - new Date(ticket.entryTime).getTime());
                 exitTimeHourly.textContent = 'Aún en estacionamiento';
                 const vehicleType = vehicleTypesCache.find(v => v.id === ticket.vehicleTypeId);
@@ -1109,15 +1147,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 ticketStatusBanner.classList.add('hidden');
             }
         }
-        
+
         const adjustButton = document.createElement('button');
         adjustButton.id = 'adjust-lost-ticket-btn';
         adjustButton.className = 'w-full sm:w-auto bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 shadow-md mt-4';
         adjustButton.textContent = 'Ajustar Cobro (Boleto Encontrado)';
-        
+
         const oldAdjustBtn = document.getElementById('adjust-lost-ticket-btn');
-        if(oldAdjustBtn) oldAdjustBtn.remove();
-        
+        if (oldAdjustBtn) oldAdjustBtn.remove();
+
         if (ticket.isLost && ticket.status === 'paid') {
             chargeButton.parentElement.appendChild(adjustButton);
             adjustButton.addEventListener('click', () => handleFoundLostTicket(ticket));
@@ -1155,6 +1193,129 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => { resetUI(); }, 4000);
             };
         } catch (error) { showToast('Error al procesar el pago.', 'error'); console.error(error); }
+    }
+
+    // En js/main.js, puede ir cerca de la función markTicketAsPaid
+
+    async function handleWaiveHours() {
+        if (!currentTicket || currentTicket.status !== 'active') return;
+
+        const hoursToWaiveStr = prompt("¿Cuántas horas desea condonar?");
+        if (hoursToWaiveStr === null) return; // El usuario canceló
+
+        const hoursToWaive = parseInt(hoursToWaiveStr);
+        if (isNaN(hoursToWaive) || hoursToWaive <= 0) {
+            showToast("Por favor, ingrese un número válido de horas.", "error");
+            return;
+        }
+
+        const vehicleType = vehicleTypesCache.find(v => v.id === currentTicket.vehicleTypeId);
+        if (!vehicleType) {
+            showToast('Error: Tipo de vehículo no encontrado.', 'error');
+            return;
+        }
+
+        const originalEntryTime = new Date(currentTicket.entryTime);
+        const adjustedEntryTime = new Date(originalEntryTime.getTime() + hoursToWaive * 60 * 60 * 1000);
+
+        const { totalCost } = calculateStayCost(adjustedEntryTime, new Date(), vehicleType, businessInfoCache, horarios);
+
+        // Actualizamos el ticket en la base de datos para que el cambio persista
+        const updatedTicket = {
+            ...currentTicket,
+            cost: totalCost,
+            notes: `Se condonaron ${hoursToWaive} hora(s) por ${currentUser.name}.`
+        };
+
+        // Guardamos el ticket actualizado en la base de datos
+        getObjectStore(TICKET_STORE_NAME, 'readwrite').put(updatedTicket).onsuccess = () => {
+            currentTicket = updatedTicket; // Actualizamos el ticket en memoria
+            showToast(`${hoursToWaive} hora(s) condonadas. Nuevo total calculado.`, 'success');
+            displayTicketInfo(currentTicket); // Refrescamos la UI con el nuevo total
+        };
+    }
+
+    // En js/main.js, cerca de las otras funciones de manejo de tickets
+
+    // EN js/main.js
+    async function handleMarkAsDefaulter() {
+        if (!currentTicket || currentTicket.status !== 'active') return;
+
+        const vehicleType = vehicleTypesCache.find(v => v.id === currentTicket.vehicleTypeId);
+        const { totalCost } = calculateStayCost(new Date(currentTicket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
+
+        let partialPayment = 0;
+        let remainingDebt = totalCost;
+        let notes = `Marcado como moroso por ${currentUser.name}.`;
+
+        // --- Inicio del nuevo flujo con preguntas ---
+        const madePartialPayment = prompt(`El adeudo total es ${formatCurrency(totalCost)}. ¿El cliente realizó un pago parcial? (Escriba "si" para confirmar)`);
+
+        if (madePartialPayment && madePartialPayment.toLowerCase() === 'si') {
+            const partialPaymentStr = prompt("Ingrese el monto que pagó el cliente:");
+            const paidAmount = parseFloat(partialPaymentStr);
+
+            if (isNaN(paidAmount) || paidAmount <= 0) {
+                showToast("Monto inválido. La operación ha sido cancelada.", "error");
+                return;
+            }
+
+            if (paidAmount >= totalCost) {
+                showToast(`El monto pagado (${formatCurrency(paidAmount)}) es igual o mayor al adeudo. Proceda con el cobro normal.`, "info");
+                return;
+            }
+
+            partialPayment = paidAmount;
+            remainingDebt = totalCost - partialPayment;
+            notes = `Pago parcial de ${formatCurrency(partialPayment)} recibido. Adeudo restante de ${formatCurrency(remainingDebt)}. Registrado por ${currentUser.name}.`;
+        }
+        // --- Fin del nuevo flujo ---
+
+        const message = `
+        <div class="text-left space-y-2">
+            <p>Se registrará a la placa <strong>${currentTicket.plate}</strong> como morosa.</p>
+            <p class="flex justify-between"><span>Adeudo Total:</span> <span>${formatCurrency(totalCost)}</span></p>
+            <p class="flex justify-between"><span>Pago Recibido:</span> <span>${formatCurrency(partialPayment)}</span></p>
+            <hr>
+            <p class="flex justify-between font-bold text-lg"><span>Deuda Pendiente:</span> <span class="text-red-600">${formatCurrency(remainingDebt)}</span></p>
+            <p class="text-xs mt-2">¿Confirma la acción?</p>
+        </div>`;
+
+        showConfirmModal(message, () => {
+            const defaulterData = {
+                plate: currentTicket.plate,
+                unpaidAmount: remainingDebt, // Guardamos solo la deuda restante
+                dateMarked: new Date(),
+                ticketBarcode: currentTicket.barcode
+            };
+
+            const updatedTicket = {
+                ...currentTicket,
+                status: 'moroso',
+                isDefaulter: true,
+                cost: partialPayment, // El 'cost' del ticket es el dinero que SÍ entró a caja
+                unpaidAmount: remainingDebt, // Nuevo campo para guardar la deuda en el ticket
+                exitTime: new Date(),
+                notes: notes
+            };
+
+            const transaction = db.transaction([TICKET_STORE_NAME, DEFAULTER_STORE_NAME], 'readwrite');
+            const ticketStore = transaction.objectStore(TICKET_STORE_NAME);
+            const defaulterStore = transaction.objectStore(DEFAULTER_STORE_NAME);
+
+            ticketStore.put(updatedTicket);
+            defaulterStore.put(defaulterData);
+
+            transaction.oncomplete = () => {
+                showToast(`Placa ${currentTicket.plate} marcada como morosa.`, 'success');
+                resetUI();
+                updateDashboardCards(); // Es crucial actualizar los indicadores del dashboard
+            };
+
+            transaction.onerror = () => {
+                showToast('Error al marcar como moroso.', 'error');
+            };
+        });
     }
 
     async function handleConvertToOvernight() {
@@ -1343,17 +1504,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!selectedPrinter) {
-            showToast("Impresora no configurada. Vaya a Configuración > Impresión.", "error");
+            showToast("Impresora no configurada. Vaya a Configuracion > Impresion.", "error");
             return;
         }
 
         if (!qz.websocket.isActive()) {
-            showToast("QZ Tray no está conectado. Intentando reconectar...", "error");
+            showToast("QZ Tray no esta conectado. Intentando reconectar...", "error");
             connectQZ();
             return;
         }
 
-        const config = qz.configs.create(selectedPrinter);
+        // === INICIO DE LA CORRECCIÓN ===
+        const config = qz.configs.create(selectedPrinter, { encoding: 'CP850' });
+        // === FIN DE LA CORRECCIÓN ===
 
         const data = [
             '\x1B' + '\x40',
@@ -1404,7 +1567,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast("Error al imprimir. Verifique la impresora y QZ Tray.", "error");
         });
     }
-    
+
     function printEntryReceipt(ticket, clientBarcode, businessBarcode) {
         if (!selectedPrinter) {
             showToast("Impresora no configurada. Recibo no impreso.", "error");
@@ -1416,8 +1579,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const config = qz.configs.create(selectedPrinter);
-        
+        // === INICIO DE LA CORRECCIÓN ===
+        // Añadimos la opción de codificación para español
+        const config = qz.configs.create(selectedPrinter, { encoding: 'CP850' });
+        // === FIN DE LA CORRECCIÓN ===
+
         const wordWrap = (text, maxWidth) => {
             const words = text.split(' ');
             let lines = [];
@@ -1438,26 +1604,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const generateReceiptData = (copyType, barcodeData) => {
             const isClientCopy = copyType === "COPIA CLIENTE";
-            
+
             const barcodeCommand = [
                 '\x1D' + '\x68' + '\x64',
                 '\x1D' + '\x77' + '\x02',
                 '\x1D' + '\x48' + '\x02',
                 '\x1D' + '\x6B' + '\x49' + String.fromCharCode(barcodeData.length) + barcodeData
             ];
-            
+
             let entryTypeDescription = "Por Hora";
             if (ticket.type === 'pension') entryTypeDescription = "Estancia Pagada";
-            if (ticket.type === 'overnight') entryTypeDescription = "Pensión Nocturna";
+            if (ticket.type === 'overnight') entryTypeDescription = "Pension Nocturna"; // Corregido: sin acento para evitar problemas si se imprime antes de configurar
+            if (ticket.type === 'moroso') entryTypeDescription = "Salida como Moroso";
 
-            const fullClauseText = "1. La empresa solamente entregará el vehículo al portador de este boleto; en caso de extravío deberá acreditar su propiedad. " +
-                                 "2. La empresa no será responsable por: A) Objetos personales no entregados en custodia. B) Robo total o parcial del vehículo y/o accesorios. C) Desperfectos mecánicos y/o eléctricos no imputables a su personal por piezas gastadas o defectuosas. D) Siniestros por causas naturales o ajenas (inundaciones, incendios, temblores, etc.). " +
-                                 "3. Si el vehículo queda fuera del horario, se ingresará al servicio de pensiones nocturnas con un costo de $100 MXN + horas acumuladas. A las 48h sin reclamo se reportará como abandonado. " +
-                                 "4. La entrega y recibido de este boleto implica la aceptación de los términos. " +
-                                 "5. Pérdida del ticket: $100 MXN";
-            
+            const fullClauseText = "1. La empresa solamente entregara el vehiculo al portador de este boleto; en caso de extravio debera acreditar su propiedad. " +
+                "2. La empresa no sera responsable por: A) Objetos personales no entregados en custodia. B) Robo total o parcial del vehiculo y/o accesorios. C) Desperfectos mecanicos y/o electricos no imputables a su personal por piezas gastadas o defectuosas. D) Siniestros por causas naturales o ajenas (inundaciones, incendios, temblores, etc.). " +
+                "3. Si el vehiculo queda fuera del horario, se ingresara al servicio de pensiones nocturnas con un costo de $100 MXN + horas acumuladas. A las 48h sin reclamo se reportara como abandonado. " +
+                "4. La entrega y recibido de este boleto implica la aceptacion de los terminos. " +
+                "5. Perdida del ticket: $100 MXN";
+
             const wrappedClause = wordWrap(fullClauseText, paperWidth);
-            
+
             const clause = isClientCopy ? [
                 '\x0A',
                 '\x1B' + '\x21' + '\x01', // Fuente pequeña
@@ -1517,7 +1684,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast("Error al imprimir recibo.", "error");
             });
     }
-    
+
     // ===== INICIO: NUEVA SECCIÓN DE LÓGICA PARA REPORTES =====
     function openReportsModal() {
         // Carga todos los datos necesarios para los reportes
@@ -1574,7 +1741,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         records.forEach(ticket => {
-            if (ticket.status === 'paid' && ticket.cost > 0) {
+            if ((ticket.status === 'paid' || ticket.status === 'moroso') && ticket.cost > 0) {
                 parkingRevenue += ticket.cost;
                 if (ticket.userPayment && userTotals[ticket.userPayment]) {
                     userTotals[ticket.userPayment].parking += ticket.cost;
@@ -1619,7 +1786,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reportUserBreakdown.innerHTML = '<p class="col-span-full text-center text-sm text-base-content-secondary">No hay datos de usuarios.</p>';
             return;
         }
-        
+
         for (const userName in summary.userTotals) {
             const user = summary.userTotals[userName];
             if (user.total > 0) {
@@ -1644,7 +1811,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 valA = valA ? new Date(valA).getTime() : 0;
                 valB = valB ? new Date(valB).getTime() : 0;
             }
-            
+
             if (valA < valB) return recordsSortDirection === 'asc' ? -1 : 1;
             if (valA > valB) return recordsSortDirection === 'asc' ? 1 : -1;
             return 0;
@@ -1664,10 +1831,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const statusClasses = {
                     active: 'bg-blue-100 text-blue-800',
                     paid: 'bg-green-100 text-green-800',
-                    cancelled: 'bg-red-100 text-red-800'
+                    cancelled: 'bg-red-100 text-red-800',
+                    moroso: 'bg-orange-100 text-orange-800'
                 };
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-base-100';
+                if (record.status === 'moroso') {
+                    // Usamos un fondo rojo muy sutil para toda la fila del moroso
+                    tr.className = 'bg-red-500/10';
+                } else {
+                    tr.className = 'hover:bg-base-100';
+                }
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${record.barcode}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">${record.plate}</td>
@@ -1694,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reportNextPageBtn.disabled = recordsCurrentPage === totalPages || totalPages === 0;
     }
     // ===== FIN: NUEVA SECCIÓN DE LÓGICA PARA REPORTES =====
-    
+
     // =====================================================================
     // ======================= INICIO: LÓGICA DE LA CALCULADORA =======================
     // =====================================================================
@@ -2116,18 +2289,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-    
+
     // =====================================================================
     // ======================= INICIO: NUEVA LÓGICA PARA BOLETO PERDIDO =======================
     // =====================================================================
-    
+
     function findActiveTicketByPlate(plate) {
         lostTicketResults.classList.add('hidden');
         if (!plate) return;
 
         const range = IDBKeyRange.only([plate, 'active']);
         const index = getObjectStore(TICKET_STORE_NAME, 'readonly').index('plate_status_idx');
-        
+
         index.get(range).onsuccess = (event) => {
             const ticket = event.target.result;
             if (ticket) {
@@ -2148,7 +2321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const { totalCost: stayCost } = calculateStayCost(new Date(ticket.entryTime), new Date(), vehicleType, businessInfoCache, horarios);
-        
+
         const lostTicketCharge = 50.00;
         const finalCost = stayCost < 100 ? 100.00 : stayCost + lostTicketCharge;
         const feeApplied = finalCost - stayCost;
@@ -2158,7 +2331,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p><span class="font-semibold">Vehículo:</span> ${ticket.vehicleTypeName} - ${ticket.brand} ${ticket.color}</p>
             <p><span class="font-semibold">Entrada:</span> ${formatDateTime(ticket.entryTime)}</p>
         `;
-        
+
         lostTicketBreakdown.innerHTML = `
             <div class="flex justify-between items-center">
                 <p>Costo por tiempo de estancia:</p>
@@ -2173,7 +2346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lostTicketTotalCost.textContent = formatCurrency(finalCost);
         lostTicketResults.classList.remove('hidden');
     }
-    
+
     function chargeLostTicket() {
         if (!currentLostTicket) return;
 
@@ -2182,12 +2355,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const lostTicketCharge = 50.00;
         const finalCost = stayCost < 100 ? 100.00 : stayCost + lostTicketCharge;
         const feeApplied = finalCost - stayCost;
-        
-        const updatedTicket = { 
-            ...currentLostTicket, 
-            exitTime: new Date(), 
-            status: 'paid', 
-            cost: finalCost, 
+
+        const updatedTicket = {
+            ...currentLostTicket,
+            exitTime: new Date(),
+            status: 'paid',
+            cost: finalCost,
             userPayment: currentUser.name,
             isLost: true,
             lostTicketFee: feeApplied
@@ -2329,13 +2502,13 @@ document.addEventListener('DOMContentLoaded', () => {
     closeServicesRevenueBtn.addEventListener('click', () => toggleModal(servicesRevenueModal, false));
     connectQzBtn.addEventListener('click', connectQZ);
     savePrinterBtn.addEventListener('click', savePrinterSelection);
-    
+
     paperWidthSlider.addEventListener('input', (e) => {
         paperWidthValue.textContent = `${e.target.value} chars`;
     });
 
     testPrintBtn.addEventListener('click', () => {
-        paperWidth = parseInt(paperWidthSlider.value); 
+        paperWidth = parseInt(paperWidthSlider.value);
         const testTicket = {
             barcode: 'TKT-TEST-01',
             type: 'hourly',
@@ -2345,14 +2518,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         printEntryReceipt(testTicket, 'TKT-TEST-01', 'R-TKT-TEST-01');
     });
-    
+
     lostTicketBtn.addEventListener('click', () => {
         resetLostTicketModal();
         toggleModal(lostTicketModal, true);
     });
-    
+
     closeLostTicketModalBtn.addEventListener('click', () => toggleModal(lostTicketModal, false));
-    
+
     lostTicketForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const plate = lostTicketPlateInput.value.trim().toUpperCase();
@@ -2360,7 +2533,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     chargeLostTicketBtn.addEventListener('click', chargeLostTicket);
-    
+
     // ===== INICIO: EVENT LISTENERS PARA REPORTES =====
     closeReportsModalBtn.addEventListener('click', () => toggleModal(reportsModal, false));
     reportSearchFilter.addEventListener('input', () => {
@@ -2404,6 +2577,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderReportTable();
         }
     });
+    waiveHoursBtn.addEventListener('click', handleWaiveHours);
+    markAsDefaulterBtn.addEventListener('click', handleMarkAsDefaulter);
     // ===== FIN: EVENT LISTENERS PARA REPORTES =====
     // ======================== FIN: EVENT LISTENERS ========================
 
@@ -2416,7 +2591,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mode: "range",
         dateFormat: "Y-m-d",
         locale: "es",
-        onChange: function(selectedDates, dateStr, instance) {
+        onChange: function (selectedDates, dateStr, instance) {
             if (selectedDates.length === 2) {
                 applyReportFilters();
             }
